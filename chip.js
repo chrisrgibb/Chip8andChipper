@@ -17,7 +17,7 @@ Chip.prototype.reset = function(){
 	this.sound_timer = 0; 
 
 	this.stack = new Uint8Array(16); 
-	this.sp = 0;
+	this.sp = 0; // stack pointer
 
 	this.keypad = new Uint8Array(16);
 	this.drawflag = false;
@@ -31,26 +31,26 @@ Chip.prototype.testRun = function(){
     this.memory[this.pc + 1] = 0xF0;
 
     this.opcode =  this.memory[this.pc] << 8 | this.memory[this.pc + 1]; 
-    this.lookupOpcode(this.opcode);
+    this.fetch(this.opcode);
     // test two
     this.reset();
     this.memory[this.pc] = 0x00;
     this.memory[this.pc + 1] = 0xEE;
   
     this.opcode =  this.memory[this.pc] << 8 | this.memory[this.pc + 1]; 
-    this.lookupOpcode(this.opcode);
+    this.fetch(this.opcode);
     console.log("pc" + this.pc);
     // test 3
     this.reset();
  	var testop = 0x00e0;
- 	this.lookupOpcode( testop );
+ 	this.fetch( testop );
 
  	// test 4 
  	this.reset();
  	var a = 0x20;
  	var b = 0x3f;
  	this.opcode = a << 8 | b;
- 	this.lookupOpcode(this.opcode);
+ 	this.fetch(this.opcode);
 
  	// test 5 
  	this.reset();
@@ -58,7 +58,7 @@ Chip.prototype.testRun = function(){
  	var a = 0x82;
  	var b = 0x34;
  	this.opcode = a << 8 | b;
- 	this.lookupOpcode(this.opcode);
+ 	this.fetch(this.opcode);
  	//1000001000110100
  // & 1111000000000000
     this.reset();
@@ -67,27 +67,27 @@ Chip.prototype.testRun = function(){
  	var b = 0x33;
  	this.opcode = a << 8 | b;
  	this.v[2] = 255;
- 	this.lookupOpcode(this.opcode);
+ 	this.fetch(this.opcode);
  	// test 7
  	this.reset();
  	console.log("TEST 7 : DXYN");
  	var a = 0xd2;
  	var b = 0x33;
  	this.opcode = a << 8 | b;
- 	this.lookupOpcode(this.opcode);
+ 	this.fetch(this.opcode);
  	// test 8 
  	this.reset();
  	console.log("TEST 8 : KEY INPUT");
  	var a = 0xe2;
  	var b = 0x9e;
  	this.opcode = a << 8 | b;
- 	this.lookupOpcode(this.opcode);
+ 	this.fetch(this.opcode);
 
 }
 
 Chip.prototype.cycle = function(){
          // Fetch Opcode
-         this.lookupOpcode(this.opcode);
+         this.fetch(this.opcode);
          if(delay_timer > 0){
          	delay_timer--;
          }
@@ -108,7 +108,7 @@ Chip.prototype.cycle = function(){
 
 
 
-Chip.prototype.lookupOpcode = function(opcode){
+Chip.prototype.fetch = function(opcode){
 
 	var convertedOp = ( opcode & 0xF000).toString(16);
 	console.log("convertedOp = " + convertedOp + ", op = " + opcode);
@@ -117,6 +117,12 @@ Chip.prototype.lookupOpcode = function(opcode){
 		case "a000" :  // ANNN
 			this.I = opcode & 0xF000;
 			console.log("ANNN " + this.I); 
+		break;
+
+		case "1000":
+			// jump to address 1NNN
+
+
 		break;
 		// 2NNN
 		case "2000":
@@ -143,6 +149,7 @@ Chip.prototype.lookupOpcode = function(opcode){
 				this.pc += 2;
 			}
 		break;
+
 		default:
 			console.log("Unknown op code "+ opcode.toString(16));
 	}

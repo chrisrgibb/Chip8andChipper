@@ -6,6 +6,8 @@
 
     });
 
+    var testprogram = "6177 6245 7101 8320 8121 8122 8233 8134\n8235 8106 8327 830e 64ff c411 32bb 1000\n0000";
+
 
     var keycodes = {
         49 : 0, 
@@ -51,13 +53,6 @@
         // array[2] = 
         // var pixel = 
     	for(var i = 0; i < len; i++){
-            // if(chip.gfx[i]==1){
-            //     var x = i % pixelSize;
-            //     var y = ( i / pixelSize ) | 0;
-            //     ctx.fillRect(x, y, pixelSize, pixelSize);
-            // }
-            // var newy = (array[i] / screenWidth) | 0; // round to int
-            // var newx = array[i] % screenWidth;
             var newy = (i / screenWidth) | 0; // round to int
             var newx  =  i % screenWidth;
             if(array[i]==1){
@@ -72,12 +67,14 @@
     function getTestArray(){
         var array = new Uint8Array(screenHeight * screenWidth);
         for( var i = 0 ; i < array.length ; i++){
-            if( i % 2 == 0){
-                array[i] = 1;
-            }
+            if(Math.random() > .5){
+                 array[i] = 1;
+            }        
         }
         return array;
     }
+
+    //
 
     drawScreen(testa);
     chip.testRun();
