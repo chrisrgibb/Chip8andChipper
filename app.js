@@ -2,8 +2,11 @@
     var count =0 ;
     window.addEventListener('keydown', function(evt){
         // console.log(evt.keyCode + " : " + count++);
-        console.log(keycodes[evt.keyCode]);
+        if(keycodes[evt.keyCode]){
 
+
+           console.log(keycodes[evt.keyCode]);
+        }
     });
 
     var testprogram = "6177 6245 7101 8320 8121 8122 8233 8134\n8235 8106 8327 830e 64ff c411 32bb 1000\n0000";
@@ -74,8 +77,41 @@
         return array;
     }
 
+    function showregisterValues(){
+        var regDiv = document.getElementById('registers');
+        var len = this.chip.v.length;
+        // var ulist = document.createElement("ul");
+        var ulist = document.getElementById("registerlist");
+        for(var i = 0 ; i < len ; i++ ){
+            var listitem = document.createElement("li");
+            listitem.innerHTML = "v[" + i +  "] = " + this.chip.v[i] ;
+            ulist.appendChild(listitem);
+            console.log(this.chip.v[i]);
+        }
+    }
+
+    function showvalues(array, divname, ulname){
+        var div = document.getElementById(divname);
+        var ulist = document.getElementById(ulname);
+        var len = array.length;
+
+        for(var i = 0 ; i < len ; i++){
+            var listitem = document.createElement('li');
+            listitem.innerHTML = "test " + i + " : " + array[i];
+            ulist.appendChild(listitem); 
+        }
+
+        // var testDiv = document.getElementById('tests');
+        // var len = this.TESTS.length;
+        // var ulist = document.getElementById('');
+
+
+    }
+
     //
 
     drawScreen(testa);
     chip.testRun();
+    showregisterValues();
+    showvalues(this.TESTS, 'tests', 'testlist');
    // console.log(opCodes);
