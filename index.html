@@ -3,8 +3,13 @@
     <head>
     	<title> chippie </title>
    	    <style type="text/css">
+
+            body{
+                font-family: sans-serif;
+            }
 	        	canvas{
 	        		border: 1px solid black;
+
 	        	}
             div{
               padding : 10px;
@@ -20,6 +25,24 @@
               display: inline-block;
               vertical-align: top;
             }
+            #playbutton{
+              width: 100px;
+              height:100px ;
+              background: red;
+              vertical-align: top;
+             
+            }
+            #playbutton:hover{
+              background: yellow;
+            }
+            .arrow-right{
+                padding: 0;
+                width: 0; 
+                height: 0; 
+                border-top: 30px solid transparent;
+                border-bottom: 30px solid transparent;
+                border-left: 60px solid green;
+            }
 	    </style>
 	    
     </head>
@@ -31,17 +54,24 @@
 
       </canvas>
       <div id ="registers">
-        <h1>registers</h1>
+        <h3>registers</h3>
         <ul id="registerlist"></ul>
       </div>
       <div id ="tests">
+        <h2>Tests</h2>
         <ul id="testlist"></ul>
+      </div>
+      <div id="playbutton">
+        <div class="arrow-right"></div>
       </div>
 
 
 
     </body>
+    <script src="http://code.jquery.com/jquery-latest.min.js"></script>
+       <script src="testpackage.js"></script>
     <script src = "chip.js"></script>
     <script src = "app.js"></script>
+ 
    
 </html>

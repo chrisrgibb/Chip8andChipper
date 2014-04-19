@@ -10,7 +10,7 @@ function Chip(){
 
 var TESTS = [];
 
-
+var STEP_THROUGH = false;
 
 Chip.prototype.reset = function(){
 	console.log("reset ");
@@ -53,7 +53,6 @@ Chip.prototype.testRun = function(){
   
     this.opcode =  this.memory[this.pc] << 8 | this.memory[this.pc + 1]; 
     this.fetch(this.opcode);
-    console.log("pc" + this.pc);
     // test 3
     this.reset();
  	var testop = 0x00e0;
@@ -185,7 +184,7 @@ Chip.prototype.testRun = function(){
  	var b = 0x55;
  	this.opcode = a << 8 | b;
  	this.fetch(this.opcode);
- 	console.log(this.v[4]);
+ 	// console.log(this.v[4]);
  	TESTS.push(this.v[4]==28);
 
 
@@ -199,7 +198,7 @@ Chip.prototype.testRun = function(){
  	var b = 0x5E;
  	this.opcode = a << 8 | b;
  	this.fetch(this.opcode);
- 	console.log(this.v[4]);
+ 	// console.log(this.v[4]);
  	TESTS.push(this.v[4]==44  );
 
 	// Test 18
@@ -242,6 +241,11 @@ Chip.prototype.cycle = function(){
 
 }
 
+
+/**
+ *
+ * a method that runs through a few test codes
+ */
 Chip.prototype.myCycle = function(opcodearray){
 	var len = opcodearray.length;
 	for(var i = 0; i< len; i++){
@@ -254,7 +258,7 @@ Chip.prototype.myCycle = function(opcodearray){
 Chip.prototype.fetch = function(opcode){
 
 	var convertedOp = ( opcode & 0xF000).toString(16);
-	console.log("convertedOp = " + convertedOp + ", op = " + opcode);
+	// console.log("convertedOp = " + convertedOp + ", op = " + opcode);
 
 	// var opcodes = {
 
@@ -346,7 +350,7 @@ Chip.prototype.fetch = function(opcode){
 		break;
 
 		case "e000":
-			console.log("get keys");
+			// console.log("get keys");
 			if(this.keypad[this.v[(opcode & 0x0F00 ) >> 8]] != 0){
 				this.pc += 4;
 			}else{
@@ -370,7 +374,7 @@ Chip.prototype.fetch = function(opcode){
 	}
 
 	convertedOp = ( opcode & 0xF00F ).toString(16);
-	console.log("second op" + convertedOp);
+	// console.log("second op" + convertedOp);
 	switch(convertedOp){
 
 		case "8000":
@@ -462,7 +466,7 @@ Chip.prototype.fetch = function(opcode){
 
 
 		case "f003":
-			console.log("F003 "  + opcode +  " " + this.I);
+			// console.log("f003 "  + opcode +  " " + this.I);
 			this.memory[this.I]   =  (this.v[(opcode & 0x0F00) >> 8] / 100  ) 	    | 0;
 			this.memory[this.I+1] =  ((this.v[(opcode & 0x0F00) >> 8] / 10 ) % 10 )  | 0;
 			this.memory[this.I+2] =  ((this.v[(opcode & 0x0F00) >> 8] % 100) % 10  ) | 0;
@@ -500,7 +504,7 @@ Chip.prototype.drawScreen = function(opcode){
 Chip.prototype.compareOpcodeZero = function(opcode){
 	// console.log(" opcodeZero " + opcode);
 	var convertedOp = ( opcode & 0x000F).toString(16);
-	console.log("convertedOp = " + convertedOp + ", op = " + opcode);
+	// console.log("convertedOp = " + convertedOp + ", op = " + opcode);
 	switch(convertedOp){
 		case "0":
 			console.log(" its 0000");

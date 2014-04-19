@@ -137,11 +137,12 @@
     }
 
 
-    chip.myCycle(opcodeArray);
+    // chip.myCycle(opcodeArray);
 
-    //chip.testRun();
+    // chip.testRun();
+    var testpackage = new TestPackage();
+    testpackage.testSuite();
     showregisterValues();
     //showvalues(this.chip.v, 'registers', 'registerlist');
     showvalues(this.TESTS, 'tests', 'testlist');
 
-   // console.log(opCodes);
