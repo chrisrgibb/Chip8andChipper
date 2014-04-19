@@ -221,25 +221,32 @@ Chip.prototype.testRun = function(){
 
 Chip.prototype.cycle = function(){
          // Fetch Opcode
-         var fetchedOp = this.fetch(this.opcode);
-         if(fetchedOp){
+        var fetchedOp = this.fetch(this.opcode);
+        if(fetchedOp){
       	   fetchedOp(); //execute op;
      	}
-         if(delay_timer > 0){
+        if(delay_timer > 0){
          	delay_timer--;
-         }
-         if(sound_timer > 0){
+        }
+        if(sound_timer > 0){
          	if(sound_timer==1){
          		console.log(" BEEEP");
          	}
          	sound_timer--;
-         }
+        }
 
           // Decode Opcode
           // Execute Opcode
          
           // Update timers
 
+}
+
+Chip.prototype.myCycle = function(opcodearray){
+	var len = opcodearray.length;
+	for(var i = 0; i< len; i++){
+		this.fetch(opcodearray[i]);
+	}
 }
 
 
