@@ -13,6 +13,22 @@
 	        	}
             div{
               padding : 10px;
+             
+            }
+            #control-panel{
+               /*display: -webkit-inline-box;*/
+              display: inline-block;
+              vertical-align: top;
+              width :200px;
+            }
+
+            #checkbox-stepthrough{
+
+
+            }
+            #testprogram{
+              border:  1px solid black;
+              
             }
             #registers{
               display: inline-block;
@@ -43,6 +59,9 @@
                 border-bottom: 30px solid transparent;
                 border-left: 60px solid green;
             }
+            #myBox{
+              display: inline;
+            }
 	    </style>
 	    
     </head>
@@ -53,6 +72,17 @@
       <canvas id="canvas">
 
       </canvas>
+      <div id ="control-panel">
+        <input type="text" name="speed" id="speedBox" placeholder="20" width="50">
+        <div id="checkbox-stepthrough">
+          <checkbox label="my checkbox" checked="true"></checkbox>
+          <input type = "checkbox" id="myBox">
+          <label for = "myBox">step_through</label>
+        </div>
+        <div id="testprogram">
+
+        </div>
+      </div>
       <div id ="registers">
         <h3>registers</h3>
         <ul id="registerlist"></ul>
@@ -61,14 +91,16 @@
         <h2>Tests</h2>
         <ul id="testlist"></ul>
       </div>
+      
       <div id="playbutton">
         <div class="arrow-right"></div>
       </div>
 
 
 
+
     </body>
-    <script src="http://code.jquery.com/jquery-latest.min.js"></script>
+    <!-- // <script src="http://code.jquery.com/jquery-latest.min.js"></script> -->
        <script src="testpackage.js"></script>
     <script src = "chip.js"></script>
     <script src = "app.js"></script>

@@ -1,4 +1,4 @@
-    
+// $(document).ready(function() {    
     var count =0 ;
     window.addEventListener('keydown', function(evt){
         // console.log(evt.keyCode + " : " + count++);
@@ -9,8 +9,19 @@
         }
     });
 
-    var testprogram = "6177 6245 7101 8320 8121 8122 8233 8134\n8235 8106 8327 830e 64ff c411 32bb 1000\n0000";
+   // var testprogram = "6177 6245 7101 8320 8121 8122 8233 8134\n8235 8106 8327 830e 64ff c411 32bb 1000\n0000";
+    // var testprogram = "61ff 6201 8124 6301 6400 8435\n0000";
+    var testprogram = "6103 8125"
     var BASE = 2; // 2 = binary 10 = decimal 16 = hex
+    var checkbox = document.getElementById("myBox");
+    var playbutton = document.getElementById("playbutton");
+
+    playbutton.addEventListener("click", function(){
+        var arry = getOpcodeArray();
+        // chip.myCycle(opcodeArray);
+        chip.myCycle(arry);
+        updateHTML();
+    });
 
     var keycodes = {
         49 : 0, 
@@ -82,6 +93,12 @@
         var len = this.chip.v.length;
         // var ulist = document.createElement("ul");
         var ulist = document.getElementById("registerlist");
+
+        if(ulist.childNodes.length > 0){
+            ulist.innerHTML = '';
+            // ulist = document.createElement("ul");
+        }
+
         for(var i = 0 ; i < len ; i++ ){
             var listitem = document.createElement("li");
             listitem.innerHTML = "v[" + i +  "] = " +  getFullBinary(this.chip.v[i]) ;
@@ -95,6 +112,12 @@
         var ulist = document.getElementById(ulname);
         var len = array.length;
 
+
+        if(ulist.childNodes.length > 0){
+            ulist.innerHTML = '';
+        }
+
+
         for(var i = 0 ; i < len ; i++){
             var listitem = document.createElement('li');
             listitem.innerHTML = "test " + i + " : " + array[i];
@@ -102,16 +125,20 @@
         }
     }
 
-    var temparray = testprogram.replace(/\n/g, " ").split(" ");
-    var opcodeArray = [];
-    for(var i = 0; i <temparray.length; i++){
-        // var str = "0x" +temparray[i];
-        // opcodeArray.push(parseInt(str));
-        var val1 = temparray[i];
-        var convertedval = parseInt(val1, 16);
+    function getOpcodeArray(){
+        var temparray = testprogram.replace(/\n/g, " ").split(" ");
+        var opcodeArray = [];
+        for(var i = 0; i <temparray.length; i++){
+            // var str = "0x" +temparray[i];
+            // opcodeArray.push(parseInt(str));
+            var val1 = temparray[i];
+            var convertedval = parseInt(val1, 16);
 
-        opcodeArray.push(parseInt(temparray[i], 16));
+            opcodeArray.push(parseInt(temparray[i], 16));
+        }
+        return opcodeArray;
     }
+
 
     /*
      *
@@ -130,6 +157,19 @@
         str = str + num;
         return str;
     }
+    /*
+     *  add
+     */
+    function updateprogram(){
+
+
+    } 
+
+    function resetEverything(){
+        chip.reset();
+        showregisterValues();
+        //showvalues(this.TESTS, 'tests', 'testlist');
+    }
 
     function updateHTML(){
         showregisterValues();
@@ -145,4 +185,6 @@
     showregisterValues();
     //showvalues(this.chip.v, 'registers', 'registerlist');
     showvalues(this.TESTS, 'tests', 'testlist');
+
+    // });
 
