@@ -9,6 +9,7 @@ function Chip(){
 }
 
 var TESTS = [];
+// var TESTS2;
 
 var STEP_THROUGH = false;
 var STEP_THROUGH_COUNT = 0;
@@ -71,6 +72,7 @@ Chip.prototype.myCycle = function(opcodearray){
 		for(var i = 0; i< len; i++){
 			this.fetch(opcodearray[i]);
 		}
+		STEP_THROUGH_COUNT  = len;
 	}
 	displayProgram();
 }
@@ -84,11 +86,6 @@ Chip.prototype.fetch = function(opcode){
 
 	var opcodes = {
 
-		"a000" : function(opcode, chip){
-			chip.I = opcode & 0x0FFF;
-			chip.pc +=2;
-			console.log("exectued from json array");
-		},
 		"1000" : function(opcode, chip){
 			// jump to address 1NNN
 			var jumpto = opcode & 0x0FFF;
@@ -127,6 +124,17 @@ Chip.prototype.fetch = function(opcode){
 			chip.v[x] += nn;
 			chip.pc += 2;
 		},
+		"a000" : function(opcode, chip){
+			chip.I = opcode & 0x0FFF;
+			chip.pc +=2;
+			console.log("exectued from json array");
+		},
+		"b000" : function(opcode, chip){
+			// BNNN	Jumps to the address NNN plus V0.
+			chip.pc = (opcode & 0x0FFF) + chip.v[0];
+
+
+		},
 		"c000" :function(opcode,chip){
 			// CXNN 
 			// random number AND NN
@@ -164,8 +172,99 @@ Chip.prototype.fetch = function(opcode){
 			}else{
 				chip.pc += 2;
 			}
-		}
+		},
+		"8000" : function(opcode, chip){
+			var convertedOp = (opcode & 0xF00F).toString(16);
+			switch(convertedOp){
+				case "8000":
+					
+					// 8XY0
+					// set the value of vx of vy
+					var x = (opcode & 0x0F00) >>8;
+					var y = (opcode & 0x00F0) >>4;
+					chip.v[x] = chip.v[y];
+					chip.pc+=2;
+				break;
+				case "8001":				
+					// 8XY1
+					// set vx to vx or vy;
+					var x = (opcode & 0x0F00) >>8;
+					var y = (opcode & 0x00F0) >>4;
+					chip.v[x] = chip.v[x] | chip.v[y];
+					chip.pc+=2;		
+				break;
+				case "8002":
+					// 8XY2
+					// set vx to vx AND vy;
+					var x = (opcode & 0x0F00) >>8;
+					var y = (opcode & 0x00F0) >>4;
+					chip.v[x] = chip.v[x] & chip.v[y];
+					chip.pc+=2;
+				break;
+				case "8003":
+					// 8XY3
+					// set vx to vx XOR vy;
+					var x = (opcode & 0x0F00) >>8;
+					var y = (opcode & 0x00F0) >>4;
+					chip.v[x] = chip.v[x] ^ chip.v[y];
+					chip.pc+=2;
+				break;
+				case "8004":
+					// add v y to vx
+					// if y is > 255 - x set carry
+					if(chip.v[(opcode & 0x00F0) >> 4] > (0xFF - chip.v[(opcode & 0x0F00) >> 8])){
+						chip.v[15] = 1; // set carry to 1
+					}else{
+						chip.v[15] = 0;
+					}
+					// add  y to x
+					chip.v[(opcode & 0x0F00) >> 8] +=chip.v[(opcode & 0x00F0) >> 4];
+					chip.pc+=2;
+				break;
+				case "8005":
+					var x = (opcode & 0x0F00) >>8;
+					var y = (opcode & 0x00F0) >>4;
+					if(chip.v[y] > chip.v[x]){  // y is bigger than x
+						chip.v[15] = 0;
+					}else{
+						chip.v[15] = 1;
+					}
+					// need to check if it is overflowing
+					chip.v[x] -= chip.v[y];
+					chip.pc+=2;
+				break;
+				case "8006":
+					var x = (opcode & 0x0F00) >>8;
+					var b = ( chip.v[x] & 0x0001 ); // get least significat byte
+					chip.v[15] = b;
+					chip.v[x] = chip.v[x] >> 1;
+					chip.pc+=2;
+				break;
 
+				case "8007":
+					var x = (opcode & 0x0F00) >>8;
+					var y = (opcode & 0x00F0) >>4;
+					if(chip.v[x] > chip.v[y]){
+						chip.v[15] = 0;
+					}else{
+						chip.v[15] = 1;
+					}
+					chip.v[y] -=chip.v[x];
+					chip.pc+=2;
+				break;
+			}
+		},
+		"9000" : function(opcode, chip){
+			// 9XY0 Skips the next instruction if VX doesn't equal VY.
+			var x = (opcode & 0x0F00) >> 8;
+			var y = (opcode & 0x00F0) >> 4;
+			console.log( " x : " + x + " y : " +  y );
+			if(chip.v[x]!=chip.v[y]){
+				chip.pc+=4;
+			}else{
+				chip.pc+=2;
+			}
+		}
 	};
 
 	if(opcodes[convertedOp]){
@@ -203,82 +302,6 @@ Chip.prototype.fetch = function(opcode){
 
 		switch(convertedOp){
 
-			case "8000":
-				// 8XY0
-				// set the value of vx of vy
-				var x = (opcode & 0x0F00) >>8;
-				var y = (opcode & 0x00F0) >>4;
-				this.v[x] = this.v[y];
-				this.pc+=2;
-			break;
-
-			case "8001":
-				// 8XY1
-				// set vx to vx or vy;
-				var x = (opcode & 0x0F00) >>8;
-				var y = (opcode & 0x00F0) >>4;
-				this.v[x] = this.v[x] | this.v[y];
-				this.pc+=2;
-			break;
-			case "8002":
-				// 8XY1
-				// set vx to vx AND vy;
-				var x = (opcode & 0x0F00) >>8;
-				var y = (opcode & 0x00F0) >>4;
-				this.v[x] = this.v[x] & this.v[y];
-				this.pc+=2;
-			break;
-			case "8003":
-				// 8XY1
-				// set vx to vx XOR vy;
-				var x = (opcode & 0x0F00) >>8;
-				var y = (opcode & 0x00F0) >>4;
-				this.v[x] = this.v[x] ^ this.v[y];
-				this.pc+=2;
-			break;
-			case "8004":
-				// add v y to vx
-				// if y is > 255 - x set carry
-				if(this.v[(opcode & 0x00F0) >> 4] > (0xFF - this.v[(opcode & 0x0F00) >> 8])){
-					this.v[15] = 1; // set carry to 1
-				}else{
-					this.v[15] = 0;
-				}
-				// add  y to x
-				this.v[(opcode & 0x0F00) >> 8] +=this.v[(opcode & 0x00F0) >> 4];
-				this.pc+=2;
-				break;
-
-			case "8005":
-				var x = (opcode & 0x0F00) >>8;
-				var y = (opcode & 0x00F0) >>4;
-				if(this.v[y] > this.v[x]){  // y is bigger than x
-					this.v[15] = 0;
-				}else{
-					this.v[15] = 1;
-				}
-				// need to check if it is overflowing
-				this.v[x] -= this.v[y];
-				this.pc+=2;
-				break;
-			case "8006":
-				var x = (opcode & 0x0F00) >>8;
-				var b = ( this.v[x] & 0x0001 ); // get least significat byte
-				this.v[15] = b;
-				this.v[x] = this.v[x] >> 1;
-				this.pc+=2;
-			break;
-			case "8007":
-				var x = (opcode & 0x0F00) >>8;
-				var y = (opcode & 0x00F0) >>4;
-				if(this.v[x] > this.v[y]){
-					this.v[15] = 0;
-				}else{
-					this.v[15] = 1;
-				}
-				this.v[y] -=this.v[x];
-				this.pc+=2;
-			break;
 			case "800e":
 				// 8X0E
 				//Shifts VX left by one. VF is set to the value of the most significant bit of VX before the shift.[

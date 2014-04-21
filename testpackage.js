@@ -3,6 +3,11 @@ function TestPackage(){
 
 }
 
+function TestResult(testname, result  ){
+    this.testname = testname;
+    this.result = result;
+}
+
 TestPackage.prototype.testSuite = function() {
 		// test one
 	// ANNN 
@@ -18,6 +23,7 @@ TestPackage.prototype.testSuite = function() {
 
 
     // test two
+    // test return from subrountine
     chip.reset();
     chip.memory[chip.pc] = 0x00;
     chip.memory[chip.pc + 1] = 0xEE;
@@ -25,12 +31,15 @@ TestPackage.prototype.testSuite = function() {
     chip.opcode =  chip.memory[chip.pc] << 8 | chip.memory[chip.pc + 1]; 
     chip.fetch(chip.opcode);
     console.log("pc" + chip.pc);
+    // TESTS.push( )
+
     // test 3
     chip.reset();
  	var testop = 0x00e0;
  	chip.fetch( testop );
 
  	// test 4 
+
  	chip.reset();
  	var a = 0x20;
  	var b = 0x3f;
@@ -160,6 +169,8 @@ TestPackage.prototype.testSuite = function() {
  	console.log(chip.v[4]);
  	TESTS.push(chip.v[4]==28);
 
+    // test 17
+
 
  	// test 17
  	// 8X0E 	"800E":
@@ -187,6 +198,15 @@ TestPackage.prototype.testSuite = function() {
  	TESTS.push(chip.v[4] != randomnumber);
  	//do it again
  	// TESTS.push(chip.v[4]==44 && v[16] );
+
+    // Test 19
+    chip.reset();
+    chip.v[0] = 0x10;
+    var a = 0xB1;
+    var b = 0x11;
+    chip.opcode = a << 8 | b;
+    chip.fetch(chip.opcode);
+    TESTS.push(chip.pc==289);
 
  
 };
