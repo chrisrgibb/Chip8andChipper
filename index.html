@@ -15,6 +15,13 @@
               padding : 10px;
              
             }
+            #resetbutton{
+              border:  1px solid black;
+              width: 50px
+            }
+            #resetbutton:hover{
+              background: yellow;
+            }
             #control-panel{
                /*display: -webkit-inline-box;*/
               display: inline-block;
@@ -28,7 +35,7 @@
             }
             #testprogram{
               border:  1px solid black;
-              
+
             }
             #registers{
               display: inline-block;
@@ -42,9 +49,7 @@
               vertical-align: top;
             }
             #playbutton{
-              width: 100px;
-              height:100px ;
-              background: red;
+            
               vertical-align: top;
              
             }
@@ -79,6 +84,10 @@
           <input type = "checkbox" id="myBox">
           <label for = "myBox">step_through</label>
         </div>
+        <div id="controls">
+          <img src="images/play.png" id="playbutton" height="50px" width="50px">
+          <div id="resetbutton">reset</div>
+        </div>
         <div id="testprogram">
 
         </div>
@@ -92,9 +101,6 @@
         <ul id="testlist"></ul>
       </div>
       
-      <div id="playbutton">
-        <div class="arrow-right"></div>
-      </div>
 
 
 

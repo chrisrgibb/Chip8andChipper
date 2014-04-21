@@ -3,24 +3,33 @@
     window.addEventListener('keydown', function(evt){
         // console.log(evt.keyCode + " : " + count++);
         if(keycodes[evt.keyCode]){
-
-
            console.log(keycodes[evt.keyCode]);
         }
     });
 
-   // var testprogram = "6177 6245 7101 8320 8121 8122 8233 8134\n8235 8106 8327 830e 64ff c411 32bb 1000\n0000";
+    var testprogram = "6177 6245 7101 8320 8121 8122 8233 8134\n8235 8106 8327 830e 64ff c411 32bb 1000\n0000";
+    // var testprogram = "610e 6204 D112";
     // var testprogram = "61ff 6201 8124 6301 6400 8435\n0000";
-    var testprogram = "6103 8125"
+    // var testprogram = "6101 8127";
     var BASE = 2; // 2 = binary 10 = decimal 16 = hex
     var checkbox = document.getElementById("myBox");
     var playbutton = document.getElementById("playbutton");
+    var resetbutton = document.getElementById("resetbutton");
 
     playbutton.addEventListener("click", function(){
         var arry = getOpcodeArray();
         // chip.myCycle(opcodeArray);
         chip.myCycle(arry);
         updateHTML();
+        playbutton.src="images/pause.png";
+        if(chip.drawflag){
+            drawScreen(chip.gfx);
+        }
+    });
+
+    resetbutton.addEventListener("click", function(){
+        resetEverything();
+        displayProgram();
     });
 
     var keycodes = {
@@ -168,12 +177,33 @@
     function resetEverything(){
         chip.reset();
         showregisterValues();
+        STEP_THROUGH_COUNT = 0;
         //showvalues(this.TESTS, 'tests', 'testlist');
     }
 
     function updateHTML(){
         showregisterValues();
         showvalues(this.TESTS, 'tests', 'testlist');
+    }
+
+    function displayProgram(){
+        var codeBox = document.getElementById('testprogram');
+        var arry = getOpcodeArray();
+        var str= "";
+        for(var i = 0; i < arry.length; i++){
+            if(i==STEP_THROUGH_COUNT){
+                str += " > " + i + ":  " + arry[i].toString(16) + "<br>";
+
+            }else{
+                str += i + ":  " + arry[i].toString(16) + "<br>";
+            }
+            // console.log(arry[i].toString(16));
+        }
+        if( STEP_THROUGH_COUNT >= arry.length){
+            str+=">done";
+        }
+        codeBox.innerHTML = str;
+        console.log(str);
     }
 
 
@@ -183,8 +213,7 @@
     var testpackage = new TestPackage();
     testpackage.testSuite();
     showregisterValues();
-    //showvalues(this.chip.v, 'registers', 'registerlist');
     showvalues(this.TESTS, 'tests', 'testlist');
-
+    displayProgram();
     // });
 

@@ -30,7 +30,8 @@ Chip.prototype.reset = function(){
 	this.keypad = new Uint8Array(16);
 	this.drawflag = false;
 
-	this.gfx = [theScreen.length];
+	// this.gfx = [32 * 64];
+	this.gfx = new Uint8Array(32 * 64);
 }
 
 
@@ -64,12 +65,14 @@ Chip.prototype.cycle = function(){
 Chip.prototype.myCycle = function(opcodearray){
 	if(checkbox.checked){
 		this.fetch(opcodearray[STEP_THROUGH_COUNT]);
+		STEP_THROUGH_COUNT++;
 	}else{
 		var len = opcodearray.length;
 		for(var i = 0; i< len; i++){
 			this.fetch(opcodearray[i]);
 		}
 	}
+	displayProgram();
 }
 
 
@@ -160,7 +163,8 @@ Chip.prototype.fetch = function(opcode){
 			// random number AND NN
 			var x     = (opcode & 0x0F00) >>8;
 			var nn    = (opcode & 0x00FF) ;
-			this.v[x] =( Math.random()  * 255) & nn;
+			var rand = (Math.random() *255) | 0;
+			this.v[x] = rand & nn;
 			
 		break;
 		// Draw to Screen
@@ -187,7 +191,7 @@ Chip.prototype.fetch = function(opcode){
 			// clear the screen
 			var len = this.gfx.length;
 			for( var i =0 ; i< len; i++ ){
-				gfx[i] = 0;
+				this.gfx[i] = 0;
 			}
 		break;
 	}
@@ -297,7 +301,7 @@ Chip.prototype.fetch = function(opcode){
 
 Chip.prototype.drawScreen = function(opcode){
 		console.log("draw screen");
-		var x = this.v[((opcode & 0x0F00) >> 8 )];
+		var x = this.v[((opcode & 0x0F00) >>	 8 )];
 		var y = this.v[(opcode & 0x00F0) >> 4 ];
 		var height = (opcode & 0x000F)  ;
 		var pixel; 
@@ -313,7 +317,7 @@ Chip.prototype.drawScreen = function(opcode){
 				}
 			}
 		}
-		this.drawflag = false;
+		this.drawflag = true;
 		this.pc +=2;
 }
 
