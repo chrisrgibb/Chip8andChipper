@@ -190,7 +190,7 @@
     function displayProgram(){
         var codeBox = document.getElementById('testprogram');
         var arry = getOpcodeArray();
-        var str= "";
+        var str= "PC : " + chip.pc + "<br>";
         for(var i = 0; i < arry.length; i++){
             if(i==STEP_THROUGH_COUNT){
                 str += " > " + i + ":  " + arry[i].toString(16) + "<br>";
