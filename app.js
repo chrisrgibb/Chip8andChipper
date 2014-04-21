@@ -62,13 +62,14 @@
     var theScreen = [screensize * screensize];
     //0x000-0x1FF'
 
-
-
     var canvas = document.getElementById('canvas');
     var ctx = canvas.getContext('2d');
 
     canvas.width = screenWidth * pixelSize;
     canvas.height = screenHeight * pixelSize;
+    var chip = new Chip();
+    var testa = getTestArray();
+
 
     function drawScreen(array){
     	var len = array.length;
@@ -85,8 +86,6 @@
     	}
     }
 
-    var chip = new Chip();
-    var testa = getTestArray();
 
     function getTestArray(){
         var array = new Uint8Array(screenHeight * screenWidth);
@@ -115,6 +114,26 @@
             ulist.appendChild(listitem);
             // console.log(this.chip.v[i]);
         }
+    }
+
+    function loadprogramintoMemory(){
+        var array = getOpcodeArray();
+        var len = array.length;
+        var shortArray = [];
+        for( var i = 0; i< len ; i++){
+            var higherbit = (array[i] & 0xFF00) >> 8;
+            var lowerbit  = (array[i] & 0x00FF);
+            shortArray.push(higherbit);
+            shortArray.push(lowerbit);
+        }
+        for( var i = 0; i < len; i++){
+            chip.memory[0x200 + i] = array[i]; 
+        }
+        for( var j = 0 ; j < shortArray.length; j++){
+            console.log( shortArray[j].toString(16)  );
+            chip.memory[0x200 + j] = shortArray[j];
+        }
+       console.log(chip.memory);
     }
 
     function showvalues(array, divname, ulname){
@@ -207,7 +226,7 @@
         console.log(str);
     }
 
-
+    loadprogramintoMemory();
     // chip.myCycle(opcodeArray);
 
     // chip.testRun();
