@@ -7,10 +7,11 @@
         }
     });
 
-    var testprogram = "6177 6245 7101 8320 8121 8122 8233 8134\n8235 8106 8327 830e 64ff c411 32bb 1000\n0000";
+    // var testprogram = "6177 6245 7101 8320 8121 8122 8233 8134\n8235 8106 8327 830e 64ff c411 32bb 1000\n0000";
     // var testprogram = "610e 6204 D112";
     // var testprogram = "61ff 6201 8124 6301 6400 8435\n0000";
     // var testprogram = "6101 8127";
+    var testprogram = "0000 000E E000 8120";
     var BASE = 2; // 2 = binary 10 = decimal 16 = hex
     var checkbox = document.getElementById("myBox");
     var playbutton = document.getElementById("playbutton");

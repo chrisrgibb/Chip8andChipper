@@ -82,221 +82,226 @@ Chip.prototype.fetch = function(opcode){
 	var convertedOp = ( opcode & 0xF000).toString(16);
 	// console.log("convertedOp = " + convertedOp + ", op = " + opcode);
 
-	// var opcodes = {
+	var opcodes = {
 
-	// 	"a000" : function(opcode, chip){
-	// 		chip.I = opcode & 0xF000;
-	// 		console.log("exectued from json array");
-	// 	},
-	// 	"1000" : function(opcode, chip){
-	// 		// jump to address 1NNN
-	// 		var jumpto = opcode & 0x0FFF;
-	// 		console.log(jumpto);
-	// 		console.log("before " + pc);
-	// 		chip.pc = jumpto;
-	// 		console.log("after " + pc);
-	// 	},
-	// 	"2000" : function(opcode, chip){
-	// 		chip.stack[chip.sp] = chip.pc;
-	// 		++chip.sp;
-	// 		chip.pc = opcode & 0x0FFF;
-	// 		console.log(" Called from json ");
-	// 	}
-	// };
-
-	// if(opcodes[convertedOp]){
-	// 	console.log( "Yes + opcode  " + opcode.toString(16));
-	// 	return opcodes[convertedOp](opcode, this);
-	// }
-
-	// first do all the ones dependent on first hex number
-	switch(convertedOp){
-		case "a000" :  // ANNN
-			this.I = opcode & 0x0FFF;
-			this.pc +=2;
-		break;
-
-		case "1000":
-			var  jumpto = opcode & 0x0FFF;
-			this.pc = jumpto;
+		"a000" : function(opcode, chip){
+			chip.I = opcode & 0x0FFF;
+			chip.pc +=2;
+			console.log("exectued from json array");
+		},
+		"1000" : function(opcode, chip){
 			// jump to address 1NNN
-		break;
-		// 2NNN
-		case "2000":
-		// console.log(this.pc);
-			this.stack[this.sp] = this.pc;
-			++this.sp;
-			this.pc = opcode & 0x0FFF;
-			console.log("pc = " + this.pc + " stack = " + this.stack);
-		break;
-		// 
-		case "3000":
+			var jumpto = opcode & 0x0FFF;
+			// console.log(jumpto);
+			// console.log("before " + pc);
+			chip.pc = jumpto;
+			// console.log("after " + pc);
+		},
+		"2000" : function(opcode, chip){
+			chip.stack[chip.sp] = chip.pc;
+			++chip.sp;
+			chip.pc = opcode & 0x0FFF;
+			console.log(" Called from json ");
+		},
+		"3000" : function(opcode, chip){
 			// Skips the next instruction if VX equals NN.
 			var x = (opcode & 0x0F00) >> 8;
 			var nn = (opcode & 0x00FF) ;
-			if(this.v[x]==nn){
-				this.pc+=2;
-			}
-		break;
-
-		case "6000":
+			if(chip.v[x]==nn){
+				chip.pc+=2;
+			}			
+		},
+		"6000" : function(opcode, chip){
 			// 6XKK
 			// set v[x] to KK
 			var x = (opcode & 0x0F00) >>8;
 			var kk = (opcode & 0x00FF) ;
-			this.v[x] = kk; 
-		break;	
-
-		case "7000":
+			chip.v[x] = kk; 
+			chip.pc +=2;
+		},
+		"7000" : function(opcode, chip){
 			// 7XNN
 			// set v[x] to v[x] + kk
 			var x = (opcode & 0x0F00) >>8;
 			var nn = (opcode & 0x00FF) ;
-			this.v[x] += nn;
-		break;
-
-		case "0" :		
-			this.compareOpcodeZero(opcode);
-		break;
-		case "c000":
+			chip.v[x] += nn;
+			chip.pc += 2;
+		},
+		"c000" :function(opcode,chip){
 			// CXNN 
 			// random number AND NN
 			var x     = (opcode & 0x0F00) >>8;
 			var nn    = (opcode & 0x00FF) ;
 			var rand = (Math.random() *255) | 0;
-			this.v[x] = rand & nn;
+			chip.v[x] = rand & nn;
+			chip.pc +=2;
+		},
+		"d000" : function(opcode,chip){
+			console.log("draw screen");
+			var x = chip.v[((opcode & 0x0F00) >>	 8 )];
+			var y = chip.v[(opcode & 0x00F0) >> 4 ];
+			var height = (opcode & 0x000F)  ;
+			var pixel; 
+			console.log(" x : " + x + " y : " + y + " height : " + height);
+			for( var yline = 0; yline < height; yline++){
+				pixel = chip.memory[chip.I + yline];
+				for( var xline = 0; xline < 8; xline++){
+					if((pixel & (0x80 >> xline)) != 0){
+						if(chip.gfx[ x + xline +((y + yline) * 64 )] ==1  ){
+							chip.v[0xF] =1;
+						}
+						chip.gfx[x + xline + ((y + yline) * 64)] ^= 1;
+					}
+				}
+			}
+			chip.drawflag = true;
+			chip.pc +=2;
 			
-		break;
-		// Draw to Screen
-		case "d000":
-			this.drawScreen(opcode);
-		break;
-
-		case "e000":
-			// console.log("get keys");
-			if(this.keypad[this.v[(opcode & 0x0F00 ) >> 8]] != 0){
-				this.pc += 4;
+		},
+		"e000" : function(opcode, chip){
+			if(chip.keypad[chip.v[(opcode & 0x0F00 ) >> 8]] != 0){
+				chip.pc += 4;
 			}else{
+				chip.pc += 2;
+			}
+		}
+
+	};
+
+	if(opcodes[convertedOp]){
+		console.log( "Yes + opcode  " + opcode.toString(16));
+		return opcodes[convertedOp](opcode, this);
+	}else{
+
+
+
+		// first do all the ones dependent on first hex number
+		switch(convertedOp){
+			case "0" :		
+				this.compareOpcodeZero(opcode);
+			break;
+
+			default: 
+		}
+
+		convertedOp = (opcode & 0x00F0).toString(16);
+		switch(convertedOp){
+			case "00E0":
+				// clear the screen
+				var len = this.gfx.length;
+				for( var i =0 ; i< len; i++ ){
+					this.gfx[i] = 0;
+				}
+			break;
+		}
+
+		convertedOp = ( opcode & 0xF00F ).toString(16);
+		// console.log("second op" + convertedOp);
+		if(opcodes[convertedOp]){
+			return opcodes[convertedOp](opcode, this);
+		}
+
+		switch(convertedOp){
+
+			case "8000":
+				// 8XY0
+				// set the value of vx of vy
+				var x = (opcode & 0x0F00) >>8;
+				var y = (opcode & 0x00F0) >>4;
+				this.v[x] = this.v[y];
+				this.pc+=2;
+			break;
+
+			case "8001":
+				// 8XY1
+				// set vx to vx or vy;
+				var x = (opcode & 0x0F00) >>8;
+				var y = (opcode & 0x00F0) >>4;
+				this.v[x] = this.v[x] | this.v[y];
+				this.pc+=2;
+			break;
+			case "8002":
+				// 8XY1
+				// set vx to vx AND vy;
+				var x = (opcode & 0x0F00) >>8;
+				var y = (opcode & 0x00F0) >>4;
+				this.v[x] = this.v[x] & this.v[y];
+				this.pc+=2;
+			break;
+			case "8003":
+				// 8XY1
+				// set vx to vx XOR vy;
+				var x = (opcode & 0x0F00) >>8;
+				var y = (opcode & 0x00F0) >>4;
+				this.v[x] = this.v[x] ^ this.v[y];
+				this.pc+=2;
+			break;
+			case "8004":
+				// add v y to vx
+				// if y is > 255 - x set carry
+				if(this.v[(opcode & 0x00F0) >> 4] > (0xFF - this.v[(opcode & 0x0F00) >> 8])){
+					this.v[15] = 1; // set carry to 1
+				}else{
+					this.v[15] = 0;
+				}
+				// add  y to x
+				this.v[(opcode & 0x0F00) >> 8] +=this.v[(opcode & 0x00F0) >> 4];
+				this.pc+=2;
+				break;
+
+			case "8005":
+				var x = (opcode & 0x0F00) >>8;
+				var y = (opcode & 0x00F0) >>4;
+				if(this.v[y] > this.v[x]){  // y is bigger than x
+					this.v[15] = 0;
+				}else{
+					this.v[15] = 1;
+				}
+				// need to check if it is overflowing
+				this.v[x] -= this.v[y];
+				this.pc+=2;
+				break;
+			case "8006":
+				var x = (opcode & 0x0F00) >>8;
+				var b = ( this.v[x] & 0x0001 ); // get least significat byte
+				this.v[15] = b;
+				this.v[x] = this.v[x] >> 1;
+				this.pc+=2;
+			break;
+			case "8007":
+				var x = (opcode & 0x0F00) >>8;
+				var y = (opcode & 0x00F0) >>4;
+				if(this.v[x] > this.v[y]){
+					this.v[15] = 0;
+				}else{
+					this.v[15] = 1;
+				}
+				this.v[y] -=this.v[x];
+				this.pc+=2;
+			break;
+			case "800e":
+				// 8X0E
+				//Shifts VX left by one. VF is set to the value of the most significant bit of VX before the shift.[
+				// assuming it is the 8th bit???
+				var x = (opcode & 0x0F00) >> 8;
+				var b = (this.v[x] & 0x80) >> 7;
+				this.v[15] = b;
+				this.v[x] = this.v[x] << 1;
+				this.pc+=2; 
+			break;
+
+			case "f003":
+				// console.log("f003 "  + opcode +  " " + this.I);
+				this.memory[this.I]   =  (this.v[(opcode & 0x0F00) >> 8] / 100  ) 	    | 0;
+				this.memory[this.I+1] =  ((this.v[(opcode & 0x0F00) >> 8] / 10 ) % 10 )  | 0;
+				this.memory[this.I+2] =  ((this.v[(opcode & 0x0F00) >> 8] % 100) % 10  ) | 0;
 				this.pc += 2;
-			}
-		break;
+				console.log(this.memory[this.I] + " " + this.memory[this.I+1] + "  "  + this.memory[this.I+2] );
+				break;
+			// case ""
+		}
 
-		default:
-			// console.log("Unknown op code "+ opcode.toString(16));
-	}
-
-	convertedOp = (opcode & 0x00F0).toString(16);
-	switch(convertedOp){
-		case "00E0":
-			// clear the screen
-			var len = this.gfx.length;
-			for( var i =0 ; i< len; i++ ){
-				this.gfx[i] = 0;
-			}
-		break;
-	}
-
-	convertedOp = ( opcode & 0xF00F ).toString(16);
-	// console.log("second op" + convertedOp);
-	switch(convertedOp){
-
-		case "8000":
-			// 8XY0
-			// set the value of vx of vy
-			var x = (opcode & 0x0F00) >>8;
-			var y = (opcode & 0x00F0) >>4;
-			this.v[x] = this.v[y];
-			this.pc+=2;
-		break;
-
-		case "8001":
-			// 8XY1
-			// set vx to vx or vy;
-			var x = (opcode & 0x0F00) >>8;
-			var y = (opcode & 0x00F0) >>4;
-			this.v[x] = this.v[x] | this.v[y];
-			this.pc+=2;
-		break;
-		case "8002":
-			// 8XY1
-			// set vx to vx AND vy;
-			var x = (opcode & 0x0F00) >>8;
-			var y = (opcode & 0x00F0) >>4;
-			this.v[x] = this.v[x] & this.v[y];
-			this.pc+=2;
-		break;
-		case "8003":
-			// 8XY1
-			// set vx to vx XOR vy;
-			var x = (opcode & 0x0F00) >>8;
-			var y = (opcode & 0x00F0) >>4;
-			this.v[x] = this.v[x] ^ this.v[y];
-			this.pc+=2;
-		break;
-		case "8004":
-			// add v y to vx
-			// if y is > 255 - x set carry
-			if(this.v[(opcode & 0x00F0) >> 4] > (0xFF - this.v[(opcode & 0x0F00) >> 8])){
-				this.v[15] = 1; // set carry to 1
-			}else{
-				this.v[15] = 0;
-			}
-			// add  y to x
-			this.v[(opcode & 0x0F00) >> 8] +=this.v[(opcode & 0x00F0) >> 4];
-			this.pc+=2;
-			break;
-
-		case "8005":
-			var x = (opcode & 0x0F00) >>8;
-			var y = (opcode & 0x00F0) >>4;
-			if(this.v[y] > this.v[x]){  // y is bigger than x
-				this.v[15] = 0;
-			}else{
-				this.v[15] = 1;
-			}
-			// need to check if it is overflowing
-			this.v[x] -= this.v[y];
-			this.pc+=2;
-			break;
-		case "8006":
-			var x = (opcode & 0x0F00) >>8;
-			var b = ( this.v[x] & 0x0001 ); // get least significat byte
-			this.v[15] = b;
-			this.v[x] = this.v[x] >> 1;
-			this.pc+=2;
-		break;
-		case "8007":
-			var x = (opcode & 0x0F00) >>8;
-			var y = (opcode & 0x00F0) >>4;
-			if(this.v[x] > this.v[y]){
-				this.v[15] = 0;
-			}else{
-				this.v[15] = 1;
-			}
-			this.v[y] -=this.v[x];
-			this.pc+=2;
-		break;
-		case "800e":
-			// 8X0E
-			//Shifts VX left by one. VF is set to the value of the most significant bit of VX before the shift.[
-			// assuming it is the 8th bit???
-			var x = (opcode & 0x0F00) >> 8;
-			var b = (this.v[x] & 0x80) >> 7;
-			this.v[15] = b;
-			this.v[x] = this.v[x] << 1;
-			this.pc+=2; 
-		break;
-
-		case "f003":
-			// console.log("f003 "  + opcode +  " " + this.I);
-			this.memory[this.I]   =  (this.v[(opcode & 0x0F00) >> 8] / 100  ) 	    | 0;
-			this.memory[this.I+1] =  ((this.v[(opcode & 0x0F00) >> 8] / 10 ) % 10 )  | 0;
-			this.memory[this.I+2] =  ((this.v[(opcode & 0x0F00) >> 8] % 100) % 10  ) | 0;
-			this.pc += 2;
-			console.log(this.memory[this.I] + " " + this.memory[this.I+1] + "  "  + this.memory[this.I+2] );
-			break;
-		// case ""
-	}
+}
 }
 
 Chip.prototype.drawScreen = function(opcode){
@@ -332,6 +337,8 @@ Chip.prototype.compareOpcodeZero = function(opcode){
 			for(var i = 0; i< len; i++){
 				this.gfx[i] = 0;
 			}
+			this.drawflag = true;
+			this.pc+=2;
 			// console.log(" its 0000");
 			break;
 		case "e":

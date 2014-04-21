@@ -1,0 +1,22 @@
+		"d000" : function(opcode,chip){
+			console.log("draw screen");
+			var x = chip.v[((opcode & 0x0F00) >>	 8 )];
+			var y = chip.v[(opcode & 0x00F0) >> 4 ];
+			var height = (opcode & 0x000F)  ;
+			var pixel; 
+			console.log(" x : " + x + " y : " + y + " height : " + height);
+			for( var yline = 0; yline < height; yline++){
+				pixel = chip.memory[chip.I + yline];
+				for( var xline = 0; xline < 8; xline++){
+					if((pixel & (0x80 >> xline)) != 0){
+						if(chip.gfx[ x + xline +((y + yline) * 64 )] ==1  ){
+							chip.v[0xF] =1;
+						}
+						chip.gfx[x + xline + ((y + yline) * 64)] ^= 1;
+					}
+				}
+			}
+			chip.drawflag = true;
+			chip.pc +=2;
+			
+		}

@@ -61,7 +61,8 @@ TestPackage.prototype.testSuite = function() {
  	var b = 0x33;
  	chip.opcode = a << 8 | b;
  	chip.fetch(chip.opcode);
- 	// test 8 
+ 	
+    // test 8 
  	chip.reset();
  	console.log("TEST 8 : KEY INPUT");
  	var a = 0xe2;
