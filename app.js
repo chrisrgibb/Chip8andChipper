@@ -11,7 +11,7 @@
     // var testprogram = "610e 6204 D112";
     // var testprogram = "61ff 6201 8124 6301 6400 8435\n0000";
     // var testprogram = "6101 8127";
-    var testprogram = "0000 000E E000 8120 6122 6211 9120";
+    var testprogram = "0000 000E E000 8120 6122 6211 9120 E19E E1A1";
     var BASE = 2; // 2 = binary 10 = decimal 16 = hex
     var checkbox = document.getElementById("myBox");
     var playbutton = document.getElementById("playbutton");
@@ -115,7 +115,9 @@
             // console.log(this.chip.v[i]);
         }
     }
-
+    /*
+     *  Takes an array and copies it to the chips memory 
+     */
     function loadprogramintoMemory(){
         var array = getOpcodeArray();
         var len = array.length;
@@ -125,9 +127,6 @@
             var lowerbit  = (array[i] & 0x00FF);
             shortArray.push(higherbit);
             shortArray.push(lowerbit);
-        }
-        for( var i = 0; i < len; i++){
-            chip.memory[0x200 + i] = array[i]; 
         }
         for( var j = 0 ; j < shortArray.length; j++){
             console.log( shortArray[j].toString(16)  );
@@ -141,12 +140,9 @@
         var ulist = document.getElementById(ulname);
         var len = array.length;
 
-
         if(ulist.childNodes.length > 0){
             ulist.innerHTML = '';
         }
-
-
         for(var i = 0 ; i < len ; i++){
             var listitem = document.createElement('li');
             listitem.innerHTML = "test " + i + " : " + array[i];
@@ -170,8 +166,8 @@
 
 
     /*
-     *
-     *  adds 0s to get the full 8-bit representation in binary
+     * 
+     *  takes a number and adds 0s to get the full 8-bit representation in binary
      */
     function getFullBinary(number){
         var num = number.toString(2);
@@ -226,6 +222,14 @@
         console.log(str);
     }
 
+    function displayMemory(){
+        var memorydiv = document.getElementById('memory');
+        chip.I = 512;
+        for (var i = chip.I -2; i < 5; i++){
+            memorydiv.innerHTML += chip.memory[i] +"<br>";
+        } 
+    }
+
     loadprogramintoMemory();
     // chip.myCycle(opcodeArray);
 
@@ -235,5 +239,6 @@
     showregisterValues();
     showvalues(this.TESTS, 'tests', 'testlist');
     displayProgram();
+    displayMemory();
     // });
 

@@ -187,11 +187,25 @@ Chip.prototype.fetch = function(opcode){
 			
 		},
 		"e000" : function(opcode, chip){
-			if(chip.keypad[chip.v[(opcode & 0x0F00 ) >> 8]] != 0){
-				chip.pc += 4;
-			}else{
-				chip.pc += 2;
+
+			var convertedOp = (opcode & 0x00FF).toString(16);
+			switch(convertedOp){
+				case "9e":
+					if(chip.keypad[chip.v[(opcode & 0x0F00 ) >> 8]] != 0){
+						chip.pc += 4;
+					}else{
+						chip.pc += 2;
+					}
+				break;
+				case "a1":
+					if(chip.keypad[chip.v[(opcode & 0x0F00 ) >> 8]] == 0){
+						chip.pc += 4;
+					}else{
+						chip.pc += 2;
+					}
+				break;
 			}
+			
 		},
 		"8000" : function(opcode, chip){
 			var convertedOp = (opcode & 0xF00F).toString(16);
