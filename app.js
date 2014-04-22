@@ -16,11 +16,12 @@
     // var testprogram = "610e 6204 D112";
     // var testprogram = "61ff 6201 8124 6301 6400 8435\n0000";
     // var testprogram = "6101 8127";
-    var testprogram = "0000 000E E000 8120 6122 6211 9120 F133 D124";
+    var testprogram = "0000 000E E000 8120 6122 6201 F229 F133 D128 D458 6303 6303 D135";
     var BASE = 2; // 2 = binary 10 = decimal 16 = hex
     var checkbox = document.getElementById("myBox");
     var playbutton = document.getElementById("playbutton");
     var resetbutton = document.getElementById("resetbutton");
+    var basebutton = document.getElementById("base");
 
     playbutton.addEventListener("click", function(){
         var arry = getOpcodeArray();
@@ -32,6 +33,7 @@
             drawScreen(chip.gfx);
         }
     });
+    basebutton.onchange = selectBase;
 
     resetbutton.addEventListener("click", function(){
         resetEverything();
@@ -73,7 +75,7 @@
     canvas.width = screenWidth * pixelSize;
     canvas.height = screenHeight * pixelSize;
     var chip = new Chip();
-    var testa = getTestArray();
+    // var testa = getTestArray();
 
     /*    
      * functions
@@ -91,7 +93,7 @@
             var newy = (i / screenWidth) | 0; // round to int
             var newx  =  i % screenWidth;
             if(array[i]==1){
-                console.log(i);
+                // console.log(i);
                 ctx.fillRect(newx + (pixelSize * newx), newy + (pixelSize * newy), pixelSize ,pixelSize  );
             }
     	}
@@ -121,11 +123,26 @@
 
         for(var i = 0 ; i < len ; i++ ){
             var listitem = document.createElement("li");
-            listitem.innerHTML = "v[" + i +  "] = " +  getFullBinary(this.chip.v[i]) ;
+            // listitem.innerHTML = "v[" + i +  "] = " +  getFullBinary(this.chip.v[i]) ;
+            listitem.innerHTML = "v[" + i +  "] = " +  getValueCurrentBase(this.chip.v[i]) ;
             ulist.appendChild(listitem);
             // console.log(this.chip.v[i]);
         }
     }
+
+    function getValueCurrentBase(val){
+        if(BASE==2){
+            return getFullBinary(val);
+        }else if(BASE==16){
+            //  return hex;
+            var num = val.toString(16);
+            var str= "0x" + num;
+            return str;
+        }else{
+            return val;
+        }
+    }
+
     /*
      *  Takes an array and copies it to the chips memory 
      */
@@ -140,10 +157,10 @@
             shortArray.push(lowerbit);
         }
         for( var j = 0 ; j < shortArray.length; j++){
-            console.log( shortArray[j].toString(16)  );
+            // console.log( shortArray[j].toString(16)  );
             chip.memory[0x200 + j] = shortArray[j];
         }
-       console.log(chip.memory);
+       // console.log(chip.memory);
     }
 
     function showvalues(array, divname, ulname){
@@ -174,7 +191,6 @@
         }
         return opcodeArray;
     }
-
 
     /*
      * 
@@ -241,15 +257,21 @@
         } 
     }
 
+    function selectBase(evt){
+        // console.log(evt);
+        BASE = basebutton.value;
+        showregisterValues();
+    }
+
     loadprogramintoMemory();
     // chip.myCycle(opcodeArray);
 
     // chip.testRun();
-    var testpackage = new TestPackage();
-    testpackage.testSuite();
+    // var testpackage = new TestPackage();
+    // testpackage.testSuite();
     showregisterValues();
-    showvalues(this.TESTS, 'tests', 'testlist');
+    // showvalues(this.TESTS, 'tests', 'testlist');
     displayProgram();
-    displayMemory();
+
     // });
 

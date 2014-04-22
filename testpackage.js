@@ -30,7 +30,7 @@ TestPackage.prototype.testSuite = function() {
   
     chip.opcode =  chip.memory[chip.pc] << 8 | chip.memory[chip.pc + 1]; 
     chip.fetch(chip.opcode);
-    console.log("pc" + chip.pc);
+    // console.log("pc" + chip.pc);
     // TESTS.push( )
 
     // test 3
@@ -49,7 +49,7 @@ TestPackage.prototype.testSuite = function() {
  	// test 5 
  	// 8XY4
  	chip.reset();
- 	console.log(" TEST 5 : ");
+ 	// console.log(" TEST 5 : ");
  	var a = 0x82;
  	var b = 0x34;
  	chip.opcode = a << 8 | b;
@@ -57,7 +57,7 @@ TestPackage.prototype.testSuite = function() {
  	//1000001000110100
  // & 1111000000000000
     chip.reset();
- 	console.log(" TEST 6 : 0xFX33  "  );
+ 	// console.log(" TEST 6 : 0xFX33  "  );
  	var a = 0xF2;
  	var b = 0x33;
  	chip.opcode = a << 8 | b;
@@ -65,7 +65,7 @@ TestPackage.prototype.testSuite = function() {
  	chip.fetch(chip.opcode);
  	// test 7
  	chip.reset();
- 	console.log("TEST 7 : DXYN");
+ 	// console.log("TEST 7 : DXYN");
  	var a = 0xd2;
  	var b = 0x33;
  	chip.opcode = a << 8 | b;
@@ -73,7 +73,7 @@ TestPackage.prototype.testSuite = function() {
  	
     // test 8 
  	chip.reset();
- 	console.log("TEST 8 : KEY INPUT");
+ 	// console.log("TEST 8 : KEY INPUT");
  	var a = 0xe2;
  	var b = 0x9e;
  	chip.opcode = a << 8 | b;
@@ -82,7 +82,7 @@ TestPackage.prototype.testSuite = function() {
  	// test 9
  	// 1NNN
  	chip.reset();
- 	console.log("TEST 8 : jumpto");
+ 	// console.log("TEST 8 : jumpto");
  	var a = 0x12;
  	var b = 0x34;
  	chip.opcode = a << 8 | b;
@@ -91,7 +91,7 @@ TestPackage.prototype.testSuite = function() {
  	// test 10
  	// 3XNN
  	chip.reset();
- 	console.log("tEST 9 : vx to nn");
+ 	// console.log("tEST 9 : vx to nn");
 
  	var pcstart = chip.pc;
  	chip.v[2] = 0x43;

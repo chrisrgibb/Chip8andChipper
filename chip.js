@@ -86,7 +86,7 @@ Chip.prototype.cycle = function(){
 /*
  * 	Load program into memory
  */
-Chip.prototype.loadProgram = function(program){
+Chip.prototype.loadProgram = function(programArray){
 
 
 
@@ -103,6 +103,7 @@ Chip.prototype.myCycle = function(opcodearray){
 		this.fetch(opcodearray[STEP_THROUGH_COUNT]);
 		STEP_THROUGH_COUNT++;
 	}else{
+		console.log("play right through");
 		var len = opcodearray.length;
 		for(var i = 0; i< len; i++){
 			this.fetch(opcodearray[i]);
@@ -121,6 +122,29 @@ Chip.prototype.fetch = function(opcode){
 
 	var opcodes = {
 
+		"0" : function(opcode, chip){
+			switch(convertedOp){
+				case "0":
+					// clear the screen
+					var len = chip.gfx.length;
+					for(var i = 0; i< len; i++){
+						chip.gfx[i] = 0;
+					}
+					chip.drawflag = true;
+					chip.pc+=2;
+					// console.log(" its 0000");
+					break;
+				case "e":
+					console.log("jump back from subrountine");
+					chip.sp--;
+					var newpc = chip.stack[chip.sp];
+					chip.pc = newpc+2;
+					// return from sub routine	
+					// console.log(" its 000E");
+					break;
+
+				}
+		},
 		"1000" : function(opcode, chip){
 			// jump to address 1NNN
 			var jumpto = opcode & 0x0FFF;
@@ -133,7 +157,6 @@ Chip.prototype.fetch = function(opcode){
 			chip.stack[chip.sp] = chip.pc;
 			++chip.sp;
 			chip.pc = opcode & 0x0FFF;
-			console.log(" Called from json ");
 		},
 		"3000" : function(opcode, chip){
 			// Skips the next instruction if VX equals NN.
@@ -142,6 +165,22 @@ Chip.prototype.fetch = function(opcode){
 			if(chip.v[x]==nn){
 				chip.pc+=2;
 			}			
+		},
+		"4000" : function(opcode, chip){
+			//Skips the next instruction if VX doesn't equal NN.
+			var x = (opcode & 0x0F00) >>8;
+			var nn = (opcode & 0x00FF) ;
+			if(chip.v[x]!=nn){
+				chip.pc+=2;
+			}
+		},
+		"5000" : function(opcode, chip){
+			// Skips the next instruction if VX equals VY.
+			var x = (opcode & 0x0F00) >>8;
+			var y = (opcode & 0x00F0) >>4;
+			if(chip.v[x]==chip.v[y]){
+				chip.pc+=2;
+			}
 		},
 		"6000" : function(opcode, chip){
 			// 6XKK
@@ -244,7 +283,7 @@ Chip.prototype.fetch = function(opcode){
 			// 9XY0 Skips the next instruction if VX doesn't equal VY.
 			var x = (opcode & 0x0F00) >> 8;
 			var y = (opcode & 0x00F0) >> 4;
-			console.log( " x : " + x + " y : " +  y );
+			//console.log( " x : " + x + " y : " +  y );
 			if(chip.v[x]!=chip.v[y]){
 				chip.pc+=4;
 			}else{
@@ -275,7 +314,7 @@ Chip.prototype.fetch = function(opcode){
 			Draw function
 		*/
 		"d000" : function(opcode,chip){
-			console.log("draw screen");
+			console.log("draw screen " + chip.I);
 			var x = chip.v[((opcode & 0x0F00) >>	 8 )];
 			var y = chip.v[(opcode & 0x00F0) >> 4 ];
 			var height = (opcode & 0x000F)  ;
@@ -323,6 +362,7 @@ Chip.prototype.fetch = function(opcode){
 				case "f007" : 
 					var x = (opcode & 0x0F00) >>8;
 					chip.v[x] = chip.delay_timer;
+					chip.pc+=2;
 				break;
 				case "f00a" :
 
@@ -331,18 +371,27 @@ Chip.prototype.fetch = function(opcode){
 				case "f015" :
 					var x = (opcode & 0x0F00) >>8;
 					chip.delay_timer = chip.v[x];
+					chip.pc+=2;
 				break;
 
 				case "f018" :
 					var x = (opcode & 0x0F00) >> 8;
 					chip.sound_timer = chip.v[x];
+					chip.pc+=2;
 				break;
 				case "f01e":
 					var x = (opcode & 0x0F00) >> 8;
 					chip.I += chip.v[x];
+					chip.pc+=2;
+				break;
+				case "f029":
+					var x = (opcode & 0x0F00) >> 8;
+					chip.I = chip.v[x] * 5;
+					chip.pc+=2;
+
 				break;
 				case "f033":
-					console.log("f003 "  + opcode +  " " + chip.I);
+					console.log("f003 "  + opcode.toString(16) +  " " + chip.I);
 					chip.memory[chip.I]   =  (chip.v[(opcode & 0x0F00) >> 8] / 100  ) 	    | 0;
 					chip.memory[chip.I+1] =  ((chip.v[(opcode & 0x0F00) >> 8] / 10 ) % 10 )  | 0;
 					chip.memory[chip.I+2] =  ((chip.v[(opcode & 0x0F00) >> 8] % 100) % 10  ) | 0;
@@ -355,7 +404,7 @@ Chip.prototype.fetch = function(opcode){
 	};
 
 	if(opcodes[convertedOp]){
-		console.log( "Yes + opcode  " + opcode.toString(16));
+		// console.log( "Yes + opcode  " + opcode.toString(16));
 		return opcodes[convertedOp](opcode, this);
 	}else{
 
@@ -401,12 +450,11 @@ Chip.prototype.fetch = function(opcode){
 			break;
 			// case ""
 		}
-
 	}
 }
 
 Chip.prototype.drawScreen = function(opcode){
-		console.log("draw screen");
+		console.log("draw screen" + this.I);
 		var x = this.v[((opcode & 0x0F00) >>	 8 )];
 		var y = this.v[(opcode & 0x00F0) >> 4 ];
 		var height = (opcode & 0x000F)  ;
@@ -445,7 +493,7 @@ Chip.prototype.compareOpcodeZero = function(opcode){
 			break;
 		case "e":
 			// return from sub routine	
-			console.log(" its 000E");
+			// console.log(" its 000E");
 			break;
 
 	}
