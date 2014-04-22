@@ -27,12 +27,22 @@
         // var arry = getOpcodeArray();
         // chip.myCycle(opcodeArray);
         // chip.myCycle(arry);
-        chip.otherCycle();
-        updateHTML();
-        playbutton.src="images/pause.png";
-        if(chip.drawflag){
-            drawScreen(chip.gfx);
+        var stepsize = 10;
+        if(checkbox.checked){
+            stepsize= 1;
         }
+
+        for( var i = 0; i< stepsize; i++){
+
+            chip.otherCycle();
+            updateHTML();
+            playbutton.src="images/pause.png";
+            if(chip.drawflag){
+                drawScreen(chip.gfx);
+            }
+        }
+
+
     });
     basebutton.onchange = selectBase;
 
@@ -86,10 +96,7 @@
 
     function drawScreen(array){
     	var len = array.length;
-        console.log(len);
-       // var array = new Uint8Array(16);
-        // array[2] = 
-        // var pixel = 
+
     	for(var i = 0; i < len; i++){
             var newy = (i / screenWidth) | 0; // round to int
             var newx  =  i % screenWidth;
@@ -185,6 +192,10 @@
         }
         // copy into the chips memory
         for( var j = 0 ; j < shortArray.length; j++){
+            if ( (0x200 + j ) == 538  ){
+                console.log("Stop here");
+            }
+
             // console.log( shortArray[j].toString(16)  );
             chip.memory[0x200 + j] = shortArray[j];
         }
@@ -280,12 +291,15 @@
 
     function displayProgram2(){
         var codeBox = document.getElementById('testprogram');
-        console.log(chip.pc);
+        // console.log(chip.pc);
         var str= "PC : " + chip.pc + "<br>";
         if(chip.pc>5){
             var stopAt = chip.pc+20;
             var i = chip.pc;
+            str += "> " + i + ": " + chip.memory[i].toString(16) + chip.memory[i+1].toString(16) +  "<br>";
+            i+=2;
             while(i < stopAt){
+
                 str += i + ": " + chip.memory[i].toString(16) + chip.memory[i+1].toString(16) +  "<br>";
                 i +=2;
             }

@@ -95,11 +95,17 @@ Chip.prototype.loadProgram = function(programArray){
 
 
 Chip.prototype.otherCycle = function(){
-	if(checkbox.checked){
-		this.fetch(this.memory[this.pc]);
-	}else{
-		this.fetch(this.memory[this.pc]);
 
+	 // var opcode =  this.memory[this.pc] << 8 | this.memory[this.pc + 1]; 
+	 var opcode = this.memory[this.pc] << 8;
+	 opcode += this.memory[this.pc + 1];
+
+	if(checkbox.checked){
+		this.fetch(opcode);
+	}else{
+		
+
+			this.fetch(opcode);
 
 	}
 	displayProgram2();
@@ -134,6 +140,7 @@ Chip.prototype.fetch = function(opcode){
 	var opcodes = {
 
 		"0" : function(opcode, chip){
+			var convertedOp = (opcode & 0x000F).toString(16);
 			switch(convertedOp){
 				case "0":
 					// clear the screen
@@ -174,6 +181,8 @@ Chip.prototype.fetch = function(opcode){
 			var x = (opcode & 0x0F00) >> 8;
 			var nn = (opcode & 0x00FF) ;
 			if(chip.v[x]==nn){
+				chip.pc+=4;
+			}else{
 				chip.pc+=2;
 			}			
 		},
@@ -182,7 +191,9 @@ Chip.prototype.fetch = function(opcode){
 			var x = (opcode & 0x0F00) >>8;
 			var nn = (opcode & 0x00FF) ;
 			if(chip.v[x]!=nn){
-				chip.pc+=2;
+				chip.pc+=4;
+			}else{
+				chip.pc+=2
 			}
 		},
 		"5000" : function(opcode, chip){
@@ -190,8 +201,11 @@ Chip.prototype.fetch = function(opcode){
 			var x = (opcode & 0x0F00) >>8;
 			var y = (opcode & 0x00F0) >>4;
 			if(chip.v[x]==chip.v[y]){
+				chip.pc+=4;
+			}else{
 				chip.pc+=2;
 			}
+
 		},
 		"6000" : function(opcode, chip){
 			// 6XKK
@@ -342,6 +356,7 @@ Chip.prototype.fetch = function(opcode){
 					}
 				}
 			}
+			console.log("DRAW FLAG = TRUE");
 			chip.drawflag = true;
 			chip.pc +=2;
 			
@@ -409,13 +424,24 @@ Chip.prototype.fetch = function(opcode){
 					chip.pc += 2;
 					console.log(chip.memory[chip.I] + " " + chip.memory[chip.I+1] + "  "  + chip.memory[chip.I+2] );
 				break;
+
+				case "f065":
+					var x = (opcode & 0x0F00) >> 8;
+					var i = 0;
+					for(var i = 0; i < x; i++){
+						chip.v[i] = chip.memory[chip.I + i];
+					}
+					chip.pc+=2;
+					// for(i ; i < 10 )
+
+				break;
 			}	
 		}
 
 	};
 
 	if(opcodes[convertedOp]){
-		// console.log( "Yes + opcode  " + opcode.toString(16));
+		console.log( "Yes + opcode  " + opcode.toString(16));
 		return opcodes[convertedOp](opcode, this);
 	}else{
 
