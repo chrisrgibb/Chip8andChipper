@@ -1,4 +1,9 @@
-// $(document).ready(function() {    
+// $(document).ready(function() { 
+
+    /*SETUP   
+     *
+     *
+     */
     var count =0 ;
     window.addEventListener('keydown', function(evt){
         // console.log(evt.keyCode + " : " + count++);
@@ -11,7 +16,7 @@
     // var testprogram = "610e 6204 D112";
     // var testprogram = "61ff 6201 8124 6301 6400 8435\n0000";
     // var testprogram = "6101 8127";
-    var testprogram = "0000 000E E000 8120 6122 6211 9120 F133";
+    var testprogram = "0000 000E E000 8120 6122 6211 9120 F133 D124";
     var BASE = 2; // 2 = binary 10 = decimal 16 = hex
     var checkbox = document.getElementById("myBox");
     var playbutton = document.getElementById("playbutton");
@@ -70,6 +75,11 @@
     var chip = new Chip();
     var testa = getTestArray();
 
+    /*    
+     * functions
+     *
+     */
+
 
     function drawScreen(array){
     	var len = array.length;
@@ -81,6 +91,7 @@
             var newy = (i / screenWidth) | 0; // round to int
             var newx  =  i % screenWidth;
             if(array[i]==1){
+                console.log(i);
                 ctx.fillRect(newx + (pixelSize * newx), newy + (pixelSize * newy), pixelSize ,pixelSize  );
             }
     	}

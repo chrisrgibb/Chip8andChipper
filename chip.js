@@ -17,7 +17,7 @@ var STEP_THROUGH_COUNT = 0;
 Chip.prototype.reset = function(){
 	// console.log("reset ");
 	this.I  = 0; // address register 
-	this.pc = 0;     // program counter
+	this.pc = 0x200;     // program counter
     this.memory = new Uint8Array(4096);
 	this.v = new Uint8Array(16);
 	this.opcode = 0; // current opcode
@@ -53,6 +53,10 @@ Chip.prototype.reset = function(){
 									0xF0, 0x80, 0xF0, 0x80, 0x80  // F
 
 	 ]);
+
+	for(var i = 0; i< 80; i++){
+		this.memory[i] = this.fontset[i];
+	}
 }
 
 
@@ -76,6 +80,17 @@ Chip.prototype.cycle = function(){
           // Execute Opcode
          
           // Update timers
+}
+
+
+/*
+ * 	Load program into memory
+ */
+Chip.prototype.loadProgram = function(program){
+
+
+
+
 }
 
 
@@ -256,6 +271,9 @@ Chip.prototype.fetch = function(opcode){
 			chip.v[x] = rand & nn;
 			chip.pc +=2;
 		},
+		/**
+			Draw function
+		*/
 		"d000" : function(opcode,chip){
 			console.log("draw screen");
 			var x = chip.v[((opcode & 0x0F00) >>	 8 )];
@@ -324,7 +342,7 @@ Chip.prototype.fetch = function(opcode){
 					chip.I += chip.v[x];
 				break;
 				case "f033":
-					// console.log("f003 "  + opcode +  " " + this.I);
+					console.log("f003 "  + opcode +  " " + chip.I);
 					chip.memory[chip.I]   =  (chip.v[(opcode & 0x0F00) >> 8] / 100  ) 	    | 0;
 					chip.memory[chip.I+1] =  ((chip.v[(opcode & 0x0F00) >> 8] / 10 ) % 10 )  | 0;
 					chip.memory[chip.I+2] =  ((chip.v[(opcode & 0x0F00) >> 8] % 100) % 10  ) | 0;
@@ -408,6 +426,7 @@ Chip.prototype.drawScreen = function(opcode){
 		this.drawflag = true;
 		this.pc +=2;
 }
+
 
 Chip.prototype.compareOpcodeZero = function(opcode){
 	// console.log(" opcodeZero " + opcode);
