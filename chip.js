@@ -108,6 +108,18 @@ Chip.prototype.otherCycle = function(){
 			this.fetch(opcode);
 
 	}
+
+    if(this.delay_timer > 0){
+     	this.delay_timer--;
+    }
+    if(this.sound_timer > 0){
+     	if(this.sound_timer==1){
+     		console.log(" BEEEP");
+     	}
+     	this.sound_timer--;
+    }
+
+
 	displayProgram2();
 }
 
@@ -345,6 +357,7 @@ Chip.prototype.fetch = function(opcode){
 			var height = (opcode & 0x000F)  ;
 			var pixel; 
 			console.log(" x : " + x + " y : " + y + " height : " + height);
+			chip.v[0xF] = 0;
 			for( var yline = 0; yline < height; yline++){
 				pixel = chip.memory[chip.I + yline];
 				for( var xline = 0; xline < 8; xline++){

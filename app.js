@@ -9,7 +9,17 @@
         // console.log(evt.keyCode + " : " + count++);
         if(keycodes[evt.keyCode]){
            console.log(keycodes[evt.keyCode]);
+           chip.keypad[ keycodes[evt.keyCode] ] = 1;
         }
+    });
+
+    window.addEventListener('keyup', function(evt){
+
+        if(keycodes[evt.keyCode]){
+             chip.keypad[ keycodes[evt.keyCode] ] = 0;
+
+        }
+
     });
 
     // var testprogram = "6177 6245 7101 8320 8121 8122 8233 8134\n8235 8106 8327 830e 64ff c411 32bb 1000\n0000";
@@ -22,6 +32,8 @@
     var playbutton = document.getElementById("playbutton");
     var resetbutton = document.getElementById("resetbutton");
     var basebutton = document.getElementById("base");
+    var running = false;
+    var intervalID;
 
     playbutton.addEventListener("click", function(){
         // var arry = getOpcodeArray();
@@ -29,18 +41,29 @@
         // chip.myCycle(arry);
         var stepsize = 10;
         if(checkbox.checked){
-            stepsize= 1;
-        }
 
-        for( var i = 0; i< stepsize; i++){
-
-            chip.otherCycle();
-            updateHTML();
-            playbutton.src="images/pause.png";
-            if(chip.drawflag){
-                drawScreen(chip.gfx);
+            if(intervalID){
+                clearInterval(intervalID);
             }
+            // stepsize= 1;
+            for( var i = 0; i< stepsize; i++){
+
+                chip.otherCycle();
+                updateHTML();
+                playbutton.src="images/pause.png";
+                if(chip.drawflag){
+                    drawScreen(chip.gfx);
+                    chip.drawflag = false;
+                }
+            }
+        }else{
+            running=true;
+            intervalID = window.setInterval(function() { looploop()}, 16);
+            
         }
+
+
+   
 
 
     });
@@ -83,8 +106,8 @@
     var canvas = document.getElementById('canvas');
     var ctx = canvas.getContext('2d');
 
-    canvas.width = screenWidth * pixelSize;
-    canvas.height = screenHeight * pixelSize;
+    canvas.width = screenWidth * pixelSize + 64;
+    canvas.height = screenHeight * pixelSize + 32;
     var chip = new Chip();
     // var testa = getTestArray();
 
@@ -105,6 +128,20 @@
                 ctx.fillRect(newx + (pixelSize * newx), newy + (pixelSize * newy), pixelSize ,pixelSize  );
             }
     	}
+    }
+
+    function looploop(){
+
+        chip.otherCycle();
+        updateHTML();
+        // playbutton.src="images/pause.png";
+        if(chip.drawflag){
+            ctx.clearRect(0, 0, screenWidth * pixelSize + 64,screenHeight * pixelSize + 32 );
+            drawScreen(chip.gfx);
+            chip.drawflag = false;
+        }
+
+
     }
 
 
@@ -292,7 +329,8 @@
     function displayProgram2(){
         var codeBox = document.getElementById('testprogram');
         // console.log(chip.pc);
-        var str= "PC : " + chip.pc + "<br>";
+        var str= "delay timer : "+ chip.delay_timer + "<br>"; 
+        str += "PC : " + chip.pc + "<br>";
         if(chip.pc>5){
             var stopAt = chip.pc+20;
             var i = chip.pc;
