@@ -98,7 +98,7 @@ Chip.prototype.otherCycle = function(){
 	if(checkbox.checked){
 		this.fetch(this.memory[this.pc]);
 	}else{
-
+		this.fetch(this.memory[this.pc]);
 
 
 	}

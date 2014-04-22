@@ -283,10 +283,16 @@
         console.log(chip.pc);
         var str= "PC : " + chip.pc + "<br>";
         if(chip.pc>5){
-            var stopAt = chip.pc+10;
-            for(var i = chip.pc; i< stopAt; i++){
-                str += i + ": " + chip.memory[i].toString(16) + "<br>";
+            var stopAt = chip.pc+20;
+            var i = chip.pc;
+            while(i < stopAt){
+                str += i + ": " + chip.memory[i].toString(16) + chip.memory[i+1].toString(16) +  "<br>";
+                i +=2;
             }
+
+            // for(var i = chip.pc; i< stopAt; i++){
+            //     str += i + ": " + chip.memory[i].toString(16) + "<br>";
+            // }
         }
         // if(  )
         codeBox.innerHTML = str;
