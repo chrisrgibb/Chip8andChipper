@@ -25,7 +25,7 @@ Chip.prototype.reset = function(){
 	this.delay_timer = 0;
 	this.sound_timer = 0; 
 
-	this.stack = new Uint8Array(16); 
+	this.stack = new Uint16Array(16); 
 	this.sp = 0; // stack pointer
 
 	this.keypad = new Uint8Array(16);
@@ -144,69 +144,6 @@ Chip.prototype.fetch = function(opcode){
 			chip.v[x] += nn;
 			chip.pc += 2;
 		},
-		"a000" : function(opcode, chip){
-			chip.I = opcode & 0x0FFF;
-			chip.pc +=2;
-			console.log("exectued from json array");
-		},
-		"b000" : function(opcode, chip){
-			// BNNN	Jumps to the address NNN plus V0.
-			chip.pc = (opcode & 0x0FFF) + chip.v[0];
-
-
-		},
-		"c000" :function(opcode,chip){
-			// CXNN 
-			// random number AND NN
-			var x     = (opcode & 0x0F00) >>8;
-			var nn    = (opcode & 0x00FF) ;
-			var rand = (Math.random() *255) | 0;
-			chip.v[x] = rand & nn;
-			chip.pc +=2;
-		},
-		"d000" : function(opcode,chip){
-			console.log("draw screen");
-			var x = chip.v[((opcode & 0x0F00) >>	 8 )];
-			var y = chip.v[(opcode & 0x00F0) >> 4 ];
-			var height = (opcode & 0x000F)  ;
-			var pixel; 
-			console.log(" x : " + x + " y : " + y + " height : " + height);
-			for( var yline = 0; yline < height; yline++){
-				pixel = chip.memory[chip.I + yline];
-				for( var xline = 0; xline < 8; xline++){
-					if((pixel & (0x80 >> xline)) != 0){
-						if(chip.gfx[ x + xline +((y + yline) * 64 )] ==1  ){
-							chip.v[0xF] =1;
-						}
-						chip.gfx[x + xline + ((y + yline) * 64)] ^= 1;
-					}
-				}
-			}
-			chip.drawflag = true;
-			chip.pc +=2;
-			
-		},
-		"e000" : function(opcode, chip){
-
-			var convertedOp = (opcode & 0x00FF).toString(16);
-			switch(convertedOp){
-				case "9e":
-					if(chip.keypad[chip.v[(opcode & 0x0F00 ) >> 8]] != 0){
-						chip.pc += 4;
-					}else{
-						chip.pc += 2;
-					}
-				break;
-				case "a1":
-					if(chip.keypad[chip.v[(opcode & 0x0F00 ) >> 8]] == 0){
-						chip.pc += 4;
-					}else{
-						chip.pc += 2;
-					}
-				break;
-			}
-			
-		},
 		"8000" : function(opcode, chip){
 			var convertedOp = (opcode & 0xF00F).toString(16);
 			switch(convertedOp){
@@ -298,7 +235,105 @@ Chip.prototype.fetch = function(opcode){
 			}else{
 				chip.pc+=2;
 			}
+		},
+		"a000" : function(opcode, chip){
+			chip.I = opcode & 0x0FFF;
+			chip.pc +=2;
+			console.log("exectued from json array");
+		},
+		"b000" : function(opcode, chip){
+			// BNNN	Jumps to the address NNN plus V0.
+			chip.pc = (opcode & 0x0FFF) + chip.v[0];
+
+
+		},
+		"c000" :function(opcode,chip){
+			// CXNN 
+			// random number AND NN
+			var x     = (opcode & 0x0F00) >>8;
+			var nn    = (opcode & 0x00FF) ;
+			var rand = (Math.random() *255) | 0;
+			chip.v[x] = rand & nn;
+			chip.pc +=2;
+		},
+		"d000" : function(opcode,chip){
+			console.log("draw screen");
+			var x = chip.v[((opcode & 0x0F00) >>	 8 )];
+			var y = chip.v[(opcode & 0x00F0) >> 4 ];
+			var height = (opcode & 0x000F)  ;
+			var pixel; 
+			console.log(" x : " + x + " y : " + y + " height : " + height);
+			for( var yline = 0; yline < height; yline++){
+				pixel = chip.memory[chip.I + yline];
+				for( var xline = 0; xline < 8; xline++){
+					if((pixel & (0x80 >> xline)) != 0){
+						if(chip.gfx[ x + xline +((y + yline) * 64 )] ==1  ){
+							chip.v[0xF] =1;
+						}
+						chip.gfx[x + xline + ((y + yline) * 64)] ^= 1;
+					}
+				}
+			}
+			chip.drawflag = true;
+			chip.pc +=2;
+			
+		},
+		"e000" : function(opcode, chip){
+
+			var convertedOp = (opcode & 0x00FF).toString(16);
+			switch(convertedOp){
+				case "9e":
+					if(chip.keypad[chip.v[(opcode & 0x0F00 ) >> 8]] != 0){
+						chip.pc += 4;
+					}else{
+						chip.pc += 2;
+					}
+				break;
+				case "a1":
+					if(chip.keypad[chip.v[(opcode & 0x0F00 ) >> 8]] == 0){
+						chip.pc += 4;
+					}else{
+						chip.pc += 2;
+					}
+				break;
+			}
+			
+		},
+		"f000" : function(opcode, chip){
+			var convertedOp = (opcode & 0xF0FF).toString(16);
+			switch ( convertedOp ){
+				case "f007" : 
+					var x = (opcode & 0x0F00) >>8;
+					chip.v[x] = chip.delay_timer;
+				break;
+				case "f00a" :
+
+				break;
+
+				case "f015" :
+					var x = (opcode & 0x0F00) >>8;
+					chip.delay_timer = chip.v[x];
+				break;
+
+				case "f018" :
+					var x = (opcode & 0x0F00) >> 8;
+					chip.sound_timer = chip.v[x];
+				break;
+				case "f01e":
+					var x = (opcode & 0x0F00) >> 8;
+					chip.I += chip.v[x];
+				break;
+				case "f033":
+					// console.log("f003 "  + opcode +  " " + this.I);
+					chip.memory[chip.I]   =  (chip.v[(opcode & 0x0F00) >> 8] / 100  ) 	    | 0;
+					chip.memory[chip.I+1] =  ((chip.v[(opcode & 0x0F00) >> 8] / 10 ) % 10 )  | 0;
+					chip.memory[chip.I+2] =  ((chip.v[(opcode & 0x0F00) >> 8] % 100) % 10  ) | 0;
+					chip.pc += 2;
+					console.log(chip.memory[chip.I] + " " + chip.memory[chip.I+1] + "  "  + chip.memory[chip.I+2] );
+				break;
+			}	
 		}
+
 	};
 
 	if(opcodes[convertedOp]){
@@ -346,19 +381,10 @@ Chip.prototype.fetch = function(opcode){
 				this.v[x] = this.v[x] << 1;
 				this.pc+=2; 
 			break;
-
-			case "f003":
-				// console.log("f003 "  + opcode +  " " + this.I);
-				this.memory[this.I]   =  (this.v[(opcode & 0x0F00) >> 8] / 100  ) 	    | 0;
-				this.memory[this.I+1] =  ((this.v[(opcode & 0x0F00) >> 8] / 10 ) % 10 )  | 0;
-				this.memory[this.I+2] =  ((this.v[(opcode & 0x0F00) >> 8] % 100) % 10  ) | 0;
-				this.pc += 2;
-				console.log(this.memory[this.I] + " " + this.memory[this.I+1] + "  "  + this.memory[this.I+2] );
-				break;
 			// case ""
 		}
 
-}
+	}
 }
 
 Chip.prototype.drawScreen = function(opcode){
@@ -404,6 +430,13 @@ Chip.prototype.compareOpcodeZero = function(opcode){
 			break;
 
 	}
+}
+
+Chip.prototype.testDraw = function(){
+	this.memory[I]     = 0x3C;
+	this.memory[I + 1] = 0xC3;
+	this.memory[I + 2] = 0xFF;
+	
 }
 
 Chip.prototype.testF = function(){
