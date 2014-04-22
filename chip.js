@@ -34,8 +34,8 @@ Chip.prototype.reset = function(){
 	// this.gfx = [32 * 64];
 	this.gfx = new Uint8Array(32 * 64);
 
-	this.fontset = new Uint8Array([  0xF0, 0x90, 0x90, 0x90, 0xF0, 
-									 0xF0, 0x90, 0x90, 0x90, 0xF0, // 0
+	this.fontset = new Uint8Array([  
+									0xF0, 0x90, 0x90, 0x90, 0xF0, // 0
 									0x20, 0x60, 0x20, 0x20, 0x70, // 1
 									0xF0, 0x10, 0xF0, 0x80, 0xF0, // 2
 									0xF0, 0x10, 0xF0, 0x10, 0xF0, // 3
@@ -93,6 +93,17 @@ Chip.prototype.loadProgram = function(programArray){
 
 }
 
+
+Chip.prototype.otherCycle = function(){
+	if(checkbox.checked){
+		this.fetch(this.memory[this.pc]);
+	}else{
+
+
+
+	}
+	displayProgram2();
+}
 
 /**
  *
@@ -411,13 +422,13 @@ Chip.prototype.fetch = function(opcode){
 
 
 		// first do all the ones dependent on first hex number
-		switch(convertedOp){
-			case "0" :		
-				this.compareOpcodeZero(opcode);
-			break;
+		// switch(convertedOp){
+		// 	case "0" :		
+		// 		this.compareOpcodeZero(opcode);
+		// 	break;
 
-			default: 
-		}
+		// 	default: 
+		// }
 
 		convertedOp = (opcode & 0x00F0).toString(16);
 		switch(convertedOp){

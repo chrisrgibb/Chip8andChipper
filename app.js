@@ -16,7 +16,7 @@
     // var testprogram = "610e 6204 D112";
     // var testprogram = "61ff 6201 8124 6301 6400 8435\n0000";
     // var testprogram = "6101 8127";
-    var testprogram = "0000 000E E000 8120 6122 6201 F229 F133 D128 D458 6303 6303 D135";
+    var testprogram = "0000 000E E000 8120 6122 6202 F229 D888 6303 6303 D135";
     var BASE = 2; // 2 = binary 10 = decimal 16 = hex
     var checkbox = document.getElementById("myBox");
     var playbutton = document.getElementById("playbutton");
@@ -24,9 +24,10 @@
     var basebutton = document.getElementById("base");
 
     playbutton.addEventListener("click", function(){
-        var arry = getOpcodeArray();
+        // var arry = getOpcodeArray();
         // chip.myCycle(opcodeArray);
-        chip.myCycle(arry);
+        // chip.myCycle(arry);
+        chip.otherCycle();
         updateHTML();
         playbutton.src="images/pause.png";
         if(chip.drawflag){
@@ -163,6 +164,34 @@
        // console.log(chip.memory);
     }
 
+    function loadProgramAsString(programString){
+
+        console.log("loadProgramAsString " + programString.length);
+        // convert giant string into array of ints
+        var temparray = programString.replace(/\n/g, " ").split(" ");
+        var opcodeArray = [];
+        for(var i = 0; i < temparray.length; i++){
+            opcodeArray.push(parseInt(temparray[i], 16));
+        }
+        // split each 16 bit byte into 2 8 bit bytes and 
+        // push into array of short
+        var len = opcodeArray.length;
+        var shortArray = [];
+        for( var i = 0; i< len ; i++){
+            var higherbit = (opcodeArray[i] & 0xFF00) >> 8;
+            var lowerbit  = (opcodeArray[i] & 0x00FF);
+            shortArray.push(higherbit);
+            shortArray.push(lowerbit);
+        }
+        // copy into the chips memory
+        for( var j = 0 ; j < shortArray.length; j++){
+            // console.log( shortArray[j].toString(16)  );
+            chip.memory[0x200 + j] = shortArray[j];
+        }
+
+
+    }
+
     function showvalues(array, divname, ulname){
         var div = document.getElementById(divname);
         var ulist = document.getElementById(ulname);
@@ -249,6 +278,22 @@
         console.log(str);
     }
 
+    function displayProgram2(){
+        var codeBox = document.getElementById('testprogram');
+        console.log(chip.pc);
+        var str= "PC : " + chip.pc + "<br>";
+        if(chip.pc>5){
+            var stopAt = chip.pc+10;
+            for(var i = chip.pc; i< stopAt; i++){
+                str += i + ": " + chip.memory[i].toString(16) + "<br>";
+            }
+        }
+        // if(  )
+        codeBox.innerHTML = str;
+
+    }
+
+
     function displayMemory(){
         var memorydiv = document.getElementById('memory');
         chip.I = 512;
@@ -263,7 +308,9 @@
         showregisterValues();
     }
 
-    loadprogramintoMemory();
+
+    // loadprogramintoMemory();
+    loadProgramAsString(progam8);
     // chip.myCycle(opcodeArray);
 
     // chip.testRun();
@@ -271,7 +318,8 @@
     // testpackage.testSuite();
     showregisterValues();
     // showvalues(this.TESTS, 'tests', 'testlist');
-    displayProgram();
+    displayProgram2();
+    // loadProgramAsString(progam8);
 
     // });
 
