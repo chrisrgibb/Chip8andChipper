@@ -103,9 +103,7 @@ Chip.prototype.otherCycle = function(){
 	if(checkbox.checked){
 		this.fetch(opcode);
 	}else{
-		
-
-			this.fetch(opcode);
+		this.fetch(opcode);
 
 	}
 
@@ -118,9 +116,7 @@ Chip.prototype.otherCycle = function(){
      	}
      	this.sound_timer--;
     }
-
-
-	displayProgram2();
+	
 }
 
 /**
@@ -132,7 +128,7 @@ Chip.prototype.myCycle = function(opcodearray){
 		this.fetch(opcodearray[STEP_THROUGH_COUNT]);
 		STEP_THROUGH_COUNT++;
 	}else{
-		console.log("play right through");
+		// console.log("play right through");
 		var len = opcodearray.length;
 		for(var i = 0; i< len; i++){
 			this.fetch(opcodearray[i]);
@@ -165,7 +161,7 @@ Chip.prototype.fetch = function(opcode){
 					// console.log(" its 0000");
 					break;
 				case "e":
-					console.log("jump back from subrountine");
+					// console.log("jump back from subrountine");
 					chip.sp--;
 					var newpc = chip.stack[chip.sp];
 					chip.pc = newpc+2;
@@ -330,7 +326,6 @@ Chip.prototype.fetch = function(opcode){
 		"a000" : function(opcode, chip){
 			chip.I = opcode & 0x0FFF;
 			chip.pc +=2;
-			console.log("exectued from json array");
 		},
 		"b000" : function(opcode, chip){
 			// BNNN	Jumps to the address NNN plus V0.
@@ -351,17 +346,18 @@ Chip.prototype.fetch = function(opcode){
 			Draw function
 		*/
 		"d000" : function(opcode,chip){
-			console.log("draw screen " + chip.I);
+			// console.log("draw screen " + chip.I);
 			var x = chip.v[((opcode & 0x0F00) >>	 8 )];
 			var y = chip.v[(opcode & 0x00F0) >> 4 ];
 			var height = (opcode & 0x000F)  ;
 			var pixel; 
-			console.log(" x : " + x + " y : " + y + " height : " + height);
+			// console.log(" x : " + x + " y : " + y + " height : " + height);
 			chip.v[0xF] = 0;
 			for( var yline = 0; yline < height; yline++){
 				pixel = chip.memory[chip.I + yline];
 				for( var xline = 0; xline < 8; xline++){
 					if((pixel & (0x80 >> xline)) != 0){
+						
 						if(chip.gfx[ x + xline +((y + yline) * 64 )] ==1  ){
 							chip.v[0xF] =1;
 						}
@@ -369,7 +365,7 @@ Chip.prototype.fetch = function(opcode){
 					}
 				}
 			}
-			console.log("DRAW FLAG = TRUE");
+			// console.log("DRAW FLAG = TRUE");
 			chip.drawflag = true;
 			chip.pc +=2;
 			
@@ -379,14 +375,16 @@ Chip.prototype.fetch = function(opcode){
 			var convertedOp = (opcode & 0x00FF).toString(16);
 			switch(convertedOp){
 				case "9e":
-					if(chip.keypad[chip.v[(opcode & 0x0F00 ) >> 8]] != 0){
+					var x = (opcode & 0x0F00 ) >> 8;
+					if(chip.keypad[chip.v[x] ] != 0){
 						chip.pc += 4;
 					}else{
 						chip.pc += 2;
 					}
 				break;
 				case "a1":
-					if(chip.keypad[chip.v[(opcode & 0x0F00 ) >> 8]] == 0){
+					var x = (opcode & 0x0F00 ) >> 8;
+					if(chip.keypad[chip.v[ x ]] == 0){
 						chip.pc += 4;
 					}else{
 						chip.pc += 2;
@@ -404,7 +402,20 @@ Chip.prototype.fetch = function(opcode){
 					chip.pc+=2;
 				break;
 				case "f00a" :
-
+					// FX0A
+					// A key press is awaited, and then stored in VX.
+					var keypress = false;
+					var x = (opcode & 0x0F00) >>8;
+					for(var i = 0; i < chip.keypad.length; i++ ){
+						if(chip.keypad[i]==1){
+							chip.v[x] = i;
+							keypress = true;
+						}
+					}
+					if(!keypress){
+						return;
+					}
+					chip.pc+=2;
 				break;
 
 				case "f015" :
@@ -430,14 +441,21 @@ Chip.prototype.fetch = function(opcode){
 
 				break;
 				case "f033":
-					console.log("f003 "  + opcode.toString(16) +  " " + chip.I);
+					// console.log("f003 "  + opcode.toString(16) +  " " + chip.I);
 					chip.memory[chip.I]   =  (chip.v[(opcode & 0x0F00) >> 8] / 100  ) 	    | 0;
 					chip.memory[chip.I+1] =  ((chip.v[(opcode & 0x0F00) >> 8] / 10 ) % 10 )  | 0;
 					chip.memory[chip.I+2] =  ((chip.v[(opcode & 0x0F00) >> 8] % 100) % 10  ) | 0;
 					chip.pc += 2;
-					console.log(chip.memory[chip.I] + " " + chip.memory[chip.I+1] + "  "  + chip.memory[chip.I+2] );
+					// console.log(chip.memory[chip.I] + " " + chip.memory[chip.I+1] + "  "  + chip.memory[chip.I+2] );
 				break;
-
+				case "f055":
+					var x = (opcode & 0x0F00) >> 8;
+					// FX55	Stores V0 to VX in memory starting at address I.[4]
+					for(var i = 0; i<= x; i++){
+						chip.memory[I+i] = chip.v[i];
+					}
+					chip.pc+=2;
+				break;
 				case "f065":
 					var x = (opcode & 0x0F00) >> 8;
 					var i = 0;
@@ -454,7 +472,7 @@ Chip.prototype.fetch = function(opcode){
 	};
 
 	if(opcodes[convertedOp]){
-		console.log( "Yes + opcode  " + opcode.toString(16));
+		// console.log( "Yes + opcode  " + opcode.toString(16));
 		return opcodes[convertedOp](opcode, this);
 	}else{
 
@@ -504,12 +522,12 @@ Chip.prototype.fetch = function(opcode){
 }
 
 Chip.prototype.drawScreen = function(opcode){
-		console.log("draw screen" + this.I);
+		// console.log("draw screen" + this.I);
 		var x = this.v[((opcode & 0x0F00) >>	 8 )];
 		var y = this.v[(opcode & 0x00F0) >> 4 ];
 		var height = (opcode & 0x000F)  ;
 		var pixel; 
-		console.log(" x : " + x + " y : " + y + " height : " + height);
+		// console.log(" x : " + x + " y : " + y + " height : " + height);
 		for( var yline = 0; yline < height; yline++){
 			pixel = this.memory[this.I + yline];
 			for( var xline = 0; xline < 8; xline++){
@@ -556,12 +574,12 @@ Chip.prototype.testDraw = function(){
 	
 }
 
-Chip.prototype.testF = function(){
-	var gf = 0x68;
-	var b1 =  gf  /100;
-	var a1 = ( ( gf / 10) % 10 ) | 0;
-	var a2 = ( gf % 100) % 10;
-	console.log( b1 + " " + a1 + " "  + a2);
+// Chip.prototype.testF = function(){
+// 	var gf = 0x68;
+// 	var b1 =  gf  /100;
+// 	var a1 = ( ( gf / 10) % 10 ) | 0;
+// 	var a2 = ( gf % 100) % 10;
+// 	console.log( b1 + " " + a1 + " "  + a2);
 
 
-}
+// }

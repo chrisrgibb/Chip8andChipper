@@ -34,7 +34,7 @@ done	DXYN	Draws a sprite at coordinate (VX, VY) that has a width of 8 pixels and
 done	EX9E	Skips the next instruction if the key stored in VX is pressed.
 done	EXA1	Skips the next instruction if the key stored in VX isn't pressed.
 done	FX07	Sets VX to the value of the delay timer.
-		FX0A	A key press is awaited, and then stored in VX.
+done	FX0A	A key press is awaited, and then stored in VX.
 done	FX15	Sets the delay timer to VX.
 done	FX18	Sets the sound timer to VX.
 done	FX1E	Adds VX to I.[3]

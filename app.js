@@ -7,8 +7,9 @@
     var count =0 ;
     window.addEventListener('keydown', function(evt){
         // console.log(evt.keyCode + " : " + count++);
+         console.log(evt.keyCode);
         if(keycodes[evt.keyCode]){
-           console.log(keycodes[evt.keyCode]);
+           // console.log(keycodes[evt.keyCode]);
            chip.keypad[ keycodes[evt.keyCode] ] = 1;
         }
     });
@@ -16,6 +17,7 @@
     window.addEventListener('keyup', function(evt){
 
         if(keycodes[evt.keyCode]){
+            console.log(evt.keyCode);
              chip.keypad[ keycodes[evt.keyCode] ] = 0;
 
         }
@@ -36,16 +38,13 @@
     var intervalID;
 
     playbutton.addEventListener("click", function(){
-        // var arry = getOpcodeArray();
-        // chip.myCycle(opcodeArray);
-        // chip.myCycle(arry);
         var stepsize = 10;
         if(checkbox.checked){
 
             if(intervalID){
                 clearInterval(intervalID);
             }
-            // stepsize= 1;
+
             for( var i = 0; i< stepsize; i++){
 
                 chip.otherCycle();
@@ -58,7 +57,8 @@
             }
         }else{
             running=true;
-            intervalID = window.setInterval(function() { looploop()}, 16);
+            // intervalID = window.setInterval(function() { looploop() }, 0);
+            intervalID = window.setInterval( looploop , 0);
             
         }
 
@@ -74,7 +74,25 @@
         displayProgram();
     });
 
-    var keycodes = {
+    // var keycodes = {
+    //     49 : 1, 
+    //     50 : 2,
+    //     51 : 3, 
+    //     52 : 4, 
+    //     81 : 5, 
+    //     87 : 6, 
+    //     69 : 7, 
+    //     82 : 8, 
+    //     65 : 9, 
+    //     83 : 10, 
+    //     68 : 11, 
+    //     70 : 12, 
+    //     90 : 13, 
+    //     88 : 14, 
+    //     67 : 15, 
+    //     86 : 16
+    // };
+        var keycodes = {
         49 : 0, 
         50 : 1,
         51 : 2, 
@@ -92,6 +110,8 @@
         67 : 14, 
         86 : 15
     };
+    
+
 
     // Screen Values
 
@@ -100,17 +120,13 @@
 
     var pixelSize = 8
     var screensize = 32 * pixelSize;
-    var theScreen = [screensize * screensize];
-    //0x000-0x1FF'
-
     var canvas = document.getElementById('canvas');
     var ctx = canvas.getContext('2d');
 
-    canvas.width = screenWidth * pixelSize + 64;
-    canvas.height = screenHeight * pixelSize + 32;
+    canvas.width = screenWidth * pixelSize ;
+    canvas.height = screenHeight * pixelSize ;
     var chip = new Chip();
-    // var testa = getTestArray();
-
+ 
     /*    
      * functions
      *
@@ -125,7 +141,8 @@
             var newx  =  i % screenWidth;
             if(array[i]==1){
                 // console.log(i);
-                ctx.fillRect(newx + (pixelSize * newx), newy + (pixelSize * newy), pixelSize ,pixelSize  );
+                // ctx.fillRect(newx + (pixelSize * newx)-1, newy + (pixelSize * newy)-1, pixelSize ,pixelSize  );
+               ctx.fillRect((pixelSize * newx),  (pixelSize * newy), pixelSize ,pixelSize  );
             }
     	}
     }
@@ -133,8 +150,10 @@
     function looploop(){
 
         chip.otherCycle();
+
         updateHTML();
         // playbutton.src="images/pause.png";
+
         if(chip.drawflag){
             ctx.clearRect(0, 0, screenWidth * pixelSize + 64,screenHeight * pixelSize + 32 );
             drawScreen(chip.gfx);
@@ -230,7 +249,7 @@
         // copy into the chips memory
         for( var j = 0 ; j < shortArray.length; j++){
             if ( (0x200 + j ) == 538  ){
-                console.log("Stop here");
+                // console.log("Stop here");
             }
 
             // console.log( shortArray[j].toString(16)  );
@@ -304,6 +323,7 @@
     function updateHTML(){
         showregisterValues();
         showvalues(this.TESTS, 'tests', 'testlist');
+        displayProgram2();
     }
 
     function displayProgram(){
@@ -323,7 +343,7 @@
             str+=">done";
         }
         codeBox.innerHTML = str;
-        console.log(str);
+        // console.log(str);
     }
 
     function displayProgram2(){
@@ -368,7 +388,7 @@
 
 
     // loadprogramintoMemory();
-    loadProgramAsString(progam8);
+    loadProgramAsString(space);
     // chip.myCycle(opcodeArray);
 
     // chip.testRun();
