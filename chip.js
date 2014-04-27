@@ -30,6 +30,7 @@ Chip.prototype.reset = function(){
 
 	this.keypad = new Uint8Array(16);
 	this.drawflag = false;
+	this.keypressed = false;
 
 	// this.gfx = [32 * 64];
 	this.gfx = new Uint8Array(32 * 64);
@@ -404,18 +405,18 @@ Chip.prototype.fetch = function(opcode){
 				case "f00a" :
 					// FX0A
 					// A key press is awaited, and then stored in VX.
-					var keypress = false;
-					var x = (opcode & 0x0F00) >>8;
-					for(var i = 0; i < chip.keypad.length; i++ ){
-						if(chip.keypad[i]==1){
-							chip.v[x] = i;
-							keypress = true;
-						}
-					}
-					if(!keypress){
-						return;
-					}
-					chip.pc+=2;
+					// var keypress = false;
+					// var x = (opcode & 0x0F00) >>8;
+					// for(var i = 0; i < chip.keypad.length; i++ ){
+					// 	if(chip.keypad[i]==1){
+					// 		chip.v[x] = i;
+					// 		keypress = true;
+					// 	}
+					// }
+					// if(!keypress){
+					// 	return;
+					// }
+					// chip.pc+=2;
 				break;
 
 				case "f015" :
@@ -432,6 +433,11 @@ Chip.prototype.fetch = function(opcode){
 				case "f01e":
 					var x = (opcode & 0x0F00) >> 8;
 					chip.I += chip.v[x];
+					if (chip.I >0xFFF){
+						chip.v[0xf] = 1;
+					}else{
+						chip.v[0xf] = 0;
+					}
 					chip.pc+=2;
 				break;
 				case "f029":
@@ -460,6 +466,7 @@ Chip.prototype.fetch = function(opcode){
 					var x = (opcode & 0x0F00) >> 8;
 					var i = 0;
 					for(var i = 0; i < x; i++){
+					// for(var i = 0; i <= x; i++){
 						chip.v[i] = chip.memory[chip.I + i];
 					}
 					chip.pc+=2;

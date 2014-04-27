@@ -6,22 +6,21 @@
      */
     var count =0 ;
     window.addEventListener('keydown', function(evt){
-        // console.log(evt.keyCode + " : " + count++);
+       
          console.log(evt.keyCode);
+         // console.log(keycodes[evt.keyCode]);
         if(keycodes[evt.keyCode]){
-           // console.log(keycodes[evt.keyCode]);
+        
            chip.keypad[ keycodes[evt.keyCode] ] = 1;
-        }
+           // chip.keypressed = true;
+        } 
     });
 
     window.addEventListener('keyup', function(evt){
-
         if(keycodes[evt.keyCode]){
             console.log(evt.keyCode);
              chip.keypad[ keycodes[evt.keyCode] ] = 0;
-
         }
-
     });
 
     // var testprogram = "6177 6245 7101 8320 8121 8122 8233 8134\n8235 8106 8327 830e 64ff c411 32bb 1000\n0000";
@@ -36,17 +35,18 @@
     var basebutton = document.getElementById("base");
     var running = false;
     var intervalID;
+    var stepsize = 10;
+    document.getElementById("stepsize").addEventListener('change', function(evt){
+        stepsize = this.value;
+    });
 
     playbutton.addEventListener("click", function(){
-        var stepsize = 10;
+        console.log(stepsize);
         if(checkbox.checked){
-
             if(intervalID){
                 clearInterval(intervalID);
             }
-
             for( var i = 0; i< stepsize; i++){
-
                 chip.otherCycle();
                 updateHTML();
                 playbutton.src="images/pause.png";
@@ -58,15 +58,24 @@
         }else{
             running=true;
             // intervalID = window.setInterval(function() { looploop() }, 0);
-            intervalID = window.setInterval( looploop , 0);
-            
+            intervalID = window.setInterval( looploop ,30);
         }
-
-
-   
-
-
     });
+
+    function looploop(){
+
+        chip.otherCycle();
+
+        updateHTML();
+        // playbutton.src="images/pause.png";
+
+        if(chip.drawflag){
+            ctx.clearRect(0, 0, screenWidth * pixelSize + 64,screenHeight * pixelSize + 32 );
+            drawScreen(chip.gfx);
+            chip.drawflag = false;
+        }
+    }
+
     basebutton.onchange = selectBase;
 
     resetbutton.addEventListener("click", function(){
@@ -147,32 +156,7 @@
     	}
     }
 
-    function looploop(){
 
-        chip.otherCycle();
-
-        updateHTML();
-        // playbutton.src="images/pause.png";
-
-        if(chip.drawflag){
-            ctx.clearRect(0, 0, screenWidth * pixelSize + 64,screenHeight * pixelSize + 32 );
-            drawScreen(chip.gfx);
-            chip.drawflag = false;
-        }
-
-
-    }
-
-
-    function getTestArray(){
-        var array = new Uint8Array(screenHeight * screenWidth);
-        for( var i = 0 ; i < array.length ; i++){
-            if(Math.random() > .5){
-                 array[i] = 1;
-            }        
-        }
-        return array;
-    }
 
     function showregisterValues(){
         var regDiv = document.getElementById('registers');
@@ -221,10 +205,9 @@
             shortArray.push(lowerbit);
         }
         for( var j = 0 ; j < shortArray.length; j++){
-            // console.log( shortArray[j].toString(16)  );
+            // console.log( shortArray[j].toString(16)  
             chip.memory[0x200 + j] = shortArray[j];
         }
-       // console.log(chip.memory);
     }
 
     function loadProgramAsString(programString){
@@ -232,8 +215,13 @@
         console.log("loadProgramAsString " + programString.length);
         // convert giant string into array of ints
         var temparray = programString.replace(/\n/g, " ").split(" ");
+
         var opcodeArray = [];
         for(var i = 0; i < temparray.length; i++){
+            var opcode = parseInt(temparray[i], 16);
+            if(opcode==0){
+                console.log(" op" + opcode);
+            }
             opcodeArray.push(parseInt(temparray[i], 16));
         }
         // split each 16 bit byte into 2 8 bit bytes and 
@@ -305,13 +293,6 @@
         str = str + num;
         return str;
     }
-    /*
-     *  add
-     */
-    function updateprogram(){
-
-
-    } 
 
     function resetEverything(){
         chip.reset();
@@ -343,7 +324,6 @@
             str+=">done";
         }
         codeBox.innerHTML = str;
-        // console.log(str);
     }
 
     function displayProgram2(){
@@ -381,14 +361,13 @@
     }
 
     function selectBase(evt){
-        // console.log(evt);
         BASE = basebutton.value;
         showregisterValues();
     }
 
 
     // loadprogramintoMemory();
-    loadProgramAsString(space);
+    loadProgramAsString(pong);
     // chip.myCycle(opcodeArray);
 
     // chip.testRun();
