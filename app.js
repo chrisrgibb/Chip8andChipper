@@ -320,29 +320,10 @@
     function updateHTML(){
         showregisterValues();
         showvalues(this.TESTS, 'tests', 'testlist');
-        displayProgram2();
+        displayProgram();
     }
 
     function displayProgram(){
-        var codeBox = document.getElementById('testprogram');
-        var arry = getOpcodeArray();
-        var str= "PC : " + chip.pc + "<br>";
-        for(var i = 0; i < arry.length; i++){
-            if(i==STEP_THROUGH_COUNT){
-                str += " > " + i + ":  " + arry[i].toString(16) + "<br>";
-
-            }else{
-                str += i + ":  " + arry[i].toString(16) + "<br>";
-            }
-            // console.log(arry[i].toString(16));
-        }
-        if( STEP_THROUGH_COUNT >= arry.length){
-            str+=">done";
-        }
-        codeBox.innerHTML = str;
-    }
-
-    function displayProgram2(){
         var codeBox = document.getElementById('testprogram');
         // console.log(chip.pc);
         var str= "delay timer : "+ chip.delay_timer + "<br>"; 
@@ -358,42 +339,20 @@
                 i +=2;
             }
 
-            // for(var i = chip.pc; i< stopAt; i++){
-            //     str += i + ": " + chip.memory[i].toString(16) + "<br>";
-            // }
         }
-        // if(  )
         codeBox.innerHTML = str;
 
     }
 
-
-    function displayMemory(){
-        var memorydiv = document.getElementById('memory');
-        chip.I = 512;
-        for (var i = chip.I -2; i < 5; i++){
-            memorydiv.innerHTML += chip.memory[i] +"<br>";
-        } 
-    }
-
     function selectBase(evt){
+        // changes the base of the registers from binary to hex etc
         BASE = basebutton.value;
         showregisterValues();
     }
 
 
-    // loadprogramintoMemory();
-    // loadProgramAsString(pong);
     xhrProgram();
-    // chip.myCycle(opcodeArray);
 
-    // chip.testRun();
-    // var testpackage = new TestPackage();
-    // testpackage.testSuite();
     showregisterValues();
-    // showvalues(this.TESTS, 'tests', 'testlist');
-    displayProgram2();
-    // loadProgramAsString(progam8);
-
-    // });
+    displayProgram();
 
