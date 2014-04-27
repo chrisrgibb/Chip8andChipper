@@ -23,11 +23,6 @@
         }
     });
 
-    // var testprogram = "6177 6245 7101 8320 8121 8122 8233 8134\n8235 8106 8327 830e 64ff c411 32bb 1000\n0000";
-    // var testprogram = "610e 6204 D112";
-    // var testprogram = "61ff 6201 8124 6301 6400 8435\n0000";
-    // var testprogram = "6101 8127";
-    var testprogram = "0000 000E E000 8120 6122 6202 F229 D888 6303 6303 D135";
     var BASE = 2; // 2 = binary 10 = decimal 16 = hex
     var checkbox = document.getElementById("myBox");
     var playbutton = document.getElementById("playbutton");
@@ -58,7 +53,7 @@
         }else{
             running=true;
             // intervalID = window.setInterval(function() { looploop() }, 0);
-            intervalID = window.setInterval( looploop ,30);
+            intervalID = window.setInterval( looploop ,0);
         }
     });
 
@@ -166,7 +161,6 @@
 
         if(ulist.childNodes.length > 0){
             ulist.innerHTML = '';
-            // ulist = document.createElement("ul");
         }
 
         for(var i = 0 ; i < len ; i++ ){
@@ -216,6 +210,10 @@
         // convert giant string into array of ints
         var temparray = programString.replace(/\n/g, " ").split(" ");
 
+        for(var i = 0 ; i< temparray.length; i++){
+            console.log(temparray[i]);
+        }
+
         var opcodeArray = [];
         for(var i = 0; i < temparray.length; i++){
             var opcode = parseInt(temparray[i], 16);
@@ -224,6 +222,7 @@
             }
             opcodeArray.push(parseInt(temparray[i], 16));
         }
+
         // split each 16 bit byte into 2 8 bit bytes and 
         // push into array of short
         var len = opcodeArray.length;
@@ -243,9 +242,26 @@
             // console.log( shortArray[j].toString(16)  );
             chip.memory[0x200 + j] = shortArray[j];
         }
-
-
     }
+
+    function xhrProgram(){
+        var xhr = new XMLHttpRequest();
+        xhr.open('GET', '/invaders.c8', true);
+        xhr.responseType = 'arraybuffer';
+
+        xhr.onload = function(oEvent){
+
+        var arraybuffer = xhr.response;
+            if( arraybuffer) {
+                var byteArray = new Uint8Array(arraybuffer);
+                for(var i = 0;i < byteArray.length; i++){
+                    chip.memory[i+0x200] = byteArray[i];
+                }
+            }
+        }
+        xhr.send();
+    }
+
 
     function showvalues(array, divname, ulname){
         var div = document.getElementById(divname);
@@ -367,7 +383,8 @@
 
 
     // loadprogramintoMemory();
-    loadProgramAsString(pong);
+    // loadProgramAsString(pong);
+    xhrProgram();
     // chip.myCycle(opcodeArray);
 
     // chip.testRun();
