@@ -7,7 +7,7 @@
     var count =0 ;
     window.addEventListener('keydown', function(evt){
        
-         console.log(evt.keyCode);
+         // console.log(evt.keyCode);
          // console.log(keycodes[evt.keyCode]);
         if(keycodes[evt.keyCode]){
         
@@ -18,7 +18,7 @@
 
     window.addEventListener('keyup', function(evt){
         if(keycodes[evt.keyCode]){
-            console.log(evt.keyCode);
+            // console.log(evt.keyCode);
              chip.keypad[ keycodes[evt.keyCode] ] = 0;
         }
     });
@@ -36,7 +36,7 @@
     });
 
     playbutton.addEventListener("click", function(){
-        console.log(stepsize);
+        // console.log(stepsize);
         if(checkbox.checked){
             if(intervalID){
                 clearInterval(intervalID);
@@ -55,13 +55,14 @@
             // intervalID = window.setInterval(function() { looploop() }, 0);
             intervalID = window.setInterval( looploop ,0);
         }
+     //   turnProgramIntoGiantString();
     });
 
     function looploop(){
 
         chip.otherCycle();
 
-        updateHTML();
+        // updateHTML();
         // playbutton.src="images/pause.png";
 
         if(chip.drawflag){
@@ -210,9 +211,10 @@
         // convert giant string into array of ints
         var temparray = programString.replace(/\n/g, " ").split(" ");
 
-        for(var i = 0 ; i< temparray.length; i++){
-            console.log(temparray[i]);
-        }
+        // for(var i = 0 ; i< temparray.length; i++){
+            // console.log(temparray[i]);
+        // }
+
 
         var opcodeArray = [];
         for(var i = 0; i < temparray.length; i++){
@@ -238,15 +240,15 @@
             if ( (0x200 + j ) == 538  ){
                 // console.log("Stop here");
             }
-
-            // console.log( shortArray[j].toString(16)  );
             chip.memory[0x200 + j] = shortArray[j];
         }
     }
 
     function xhrProgram(){
         var xhr = new XMLHttpRequest();
-        xhr.open('GET', '/invaders.c8', true);
+        // xhr.open('GET', '/invaders.c8', true);
+        // xhr.open('GET', '/pong2.c8', true);
+        xhr.open('GET', '/tetris.c8', true);
         xhr.responseType = 'arraybuffer';
 
         xhr.onload = function(oEvent){
@@ -260,7 +262,7 @@
             }
         }
         xhr.send();
-    }
+    }   
 
 
     function showvalues(array, divname, ulname){
@@ -310,6 +312,49 @@
         return str;
     }
 
+    function turnProgramIntoGiantString(){
+        // var byteArray = new Uint8Array(chip.memory.length);
+        // var ar = chip.memory.slice(0x200, chip.memory.length);
+        console.log(chip.memory);
+        // var byteArray = new Uint8Array( chip.memory.slice(512, 4096 )  );
+        var gg = chip.memory;
+
+        var byteArray = new Uint8Array(4096);
+        // for(var ii = 0; ii < 4096 - 0x200; ii++ ){
+        //     var mem = chip.memory[ii+512];
+        //     // console.log(mem);
+        //     byteArray[i] = mem;
+
+        // }
+
+        var j = 0x200, i = 0, len = chip.memory.length-0x200;
+        var str = "";
+        while(j < len){
+            if(j%32==0){
+                console.log("pause here");
+            }
+            i=0;
+            str += (j-0x200).toString(16);
+            while(i < 8){
+                if(i % 2==0){
+                    str+=' ';
+                }
+                // var code = byteArray[j+i].toString(16);
+                if(chip.memory[j+i]){
+                    // str += code;
+                    var code = chip.memory[j+i].toString(16);
+                    str += chip.memory[j+i].toString(16);
+                }else if(chip.memory[j+i]==0){
+                    str += '00';
+                }  
+                i++;
+            }
+            str+= '\n';
+            j+=8;
+        }
+        // console.log(str);
+    }
+
     function resetEverything(){
         chip.reset();
         showregisterValues();
@@ -318,8 +363,8 @@
     }
 
     function updateHTML(){
-        showregisterValues();
-        showvalues(this.TESTS, 'tests', 'testlist');
+        // showregisterValues();
+        // showvalues(this.TESTS, 'tests', 'testlist');
         displayProgram();
     }
 
@@ -330,18 +375,40 @@
         str += "PC : " + chip.pc + "<br>";
         if(chip.pc>5){
             var stopAt = chip.pc+20;
-            var i = chip.pc;
-            str += "> " + i + ": " + chip.memory[i].toString(16) + chip.memory[i+1].toString(16) +  "<br>";
-            i+=2;
+            var i = chip.pc-4;
+            // str += "> " + i + ": " + chip.memory[i].toString(16) + chip.memory[i+1].toString(16) +  "<br>";
+            
+            // i+=2;
             while(i < stopAt){
-
-                str += i + ": " + chip.memory[i].toString(16) + chip.memory[i+1].toString(16) +  "<br>";
+                if(i==chip.pc){
+                     str += "> " + i + ": " + getOpcodeHex(i) +  "<br>";
+                }else{
+                // str += i + ": " + chip.memory[i].toString(16) + chip.memory[i+1].toString(16) +  "<br>";
+                    str += i + ": " + getOpcodeHex(i) +  "<br>";
+                }
                 i +=2;
             }
-
         }
         codeBox.innerHTML = str;
+    }
 
+    function getOpcodeHex(index){
+        var hibyte  = chip.memory[index].toString(16);
+        var lowbyte = chip.memory[index+1].toString(16);
+        if(hibyte=='0'){
+            hibyte = '00';
+        }
+        if(lowbyte=='0'){
+            lowbyte='00';
+        }
+        return lowbyte+hibyte;
+    }
+
+    function printCodes(){
+        var array = chip.memory;
+        for(var i =0x200 ; i< array.length; i++){
+            console.log(array[i]);
+        }
     }
 
     function selectBase(evt){
@@ -355,4 +422,6 @@
 
     showregisterValues();
     displayProgram();
+
+    
 

@@ -1,5 +1,0 @@
-	chip.memory[chip.I]   =  (chip.v[(opcode & 0x0F00) >> 8] / 100  ) 	    | 0;
-					chip.memory[chip.I+1] =  ((chip.v[(opcode & 0x0F00) >> 8] / 10 ) % 10 )  | 0;
-					chip.memory[chip.I+2] =  ((chip.v[(opcode & 0x0F00) >> 8] % 100) % 10  ) | 0;
-					chip.pc += 2;
-					console.log(chip.memory[chip.I] + " " + chip.memory[chip.I+1] + "  "  + chip.memory[chip.I+2] );

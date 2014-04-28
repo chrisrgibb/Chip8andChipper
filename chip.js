@@ -97,10 +97,10 @@ Chip.prototype.loadProgram = function(programArray){
 
 Chip.prototype.otherCycle = function(){
 
-	 // var opcode =  this.memory[this.pc] << 8 | this.memory[this.pc + 1]; 
-	 var opcode = this.memory[this.pc] << 8;
-	 opcode += this.memory[this.pc + 1];
-
+	 var opcode =  this.memory[this.pc] << 8 | this.memory[this.pc + 1]; 
+	 // var opcode = this.memory[this.pc] << 8;
+	 // opcode += this.memory[this.pc + 1];
+	 var hexcode = opcode.toString(16);
 	if(checkbox.checked){
 		this.fetch(opcode);
 	}else{
@@ -144,6 +144,7 @@ Chip.prototype.myCycle = function(opcodearray){
 Chip.prototype.fetch = function(opcode){
 
 	var convertedOp = ( opcode & 0xF000).toString(16);
+
 	// console.log("convertedOp = " + convertedOp + ", op = " + opcode);
 
 	var opcodes = {
@@ -457,19 +458,21 @@ Chip.prototype.fetch = function(opcode){
 				case "f055":
 					var x = (opcode & 0x0F00) >> 8;
 					// FX55	Stores V0 to VX in memory starting at address I.[4]
-					for(var i = 0; i<= x; i++){
+					for(var i = 0; i< x; i++){
 						chip.memory[I+i] = chip.v[i];
 					}
+					chip.I += x+1;
 					chip.pc+=2;
 				break;
 				case "f065":
 					var x = (opcode & 0x0F00) >> 8;
 					var i = 0;
-					for(var i = 0; i < x; i++){
+					for(var i = 0; i <= x; i++){
 					// for(var i = 0; i <= x; i++){
 						chip.v[i] = chip.memory[chip.I + i];
 					}
 					chip.pc+=2;
+					chip.I += x+1;
 					// for(i ; i < 10 )
 
 				break;
