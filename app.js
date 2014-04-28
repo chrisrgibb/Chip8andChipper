@@ -5,20 +5,35 @@
      *
      */
     var count =0 ;
+
+    var keycodes = {
+        49 : 0, 
+        50 : 1,
+        51 : 2, 
+        52 : 3, 
+        81 : 4, 
+        87 : 5, 
+        69 : 6, 
+        82 : 7, 
+        65 : 8, 
+        83 : 9, 
+        68 : 10, 
+        70 : 11, 
+        90 : 12, 
+        88 : 13, 
+        67 : 14, 
+        86 : 15
+    };
+    
     window.addEventListener('keydown', function(evt){
        
-         // console.log(evt.keyCode);
-         // console.log(keycodes[evt.keyCode]);
         if(keycodes[evt.keyCode]){
-        
            chip.keypad[ keycodes[evt.keyCode] ] = 1;
-           // chip.keypressed = true;
         } 
     });
 
     window.addEventListener('keyup', function(evt){
         if(keycodes[evt.keyCode]){
-            // console.log(evt.keyCode);
              chip.keypad[ keycodes[evt.keyCode] ] = 0;
         }
     });
@@ -31,18 +46,18 @@
     var running = false;
     var intervalID;
     var stepsize = 10;
+
     document.getElementById("stepsize").addEventListener('change', function(evt){
         stepsize = this.value;
     });
 
     playbutton.addEventListener("click", function(){
-        // console.log(stepsize);
         if(checkbox.checked){
             if(intervalID){
                 clearInterval(intervalID);
             }
             for( var i = 0; i< stepsize; i++){
-                chip.otherCycle();
+                chip.cycle();
                 updateHTML();
                 playbutton.src="images/pause.png";
                 if(chip.drawflag){
@@ -51,26 +66,12 @@
                 }
             }
         }else{
+            console.log("esle");
             running=true;
-            // intervalID = window.setInterval(function() { looploop() }, 0);
-            intervalID = window.setInterval( looploop ,0);
+            intervalID = window.setInterval( mainLoop ,10);
         }
      //   turnProgramIntoGiantString();
     });
-
-    function looploop(){
-
-        chip.otherCycle();
-
-        // updateHTML();
-        // playbutton.src="images/pause.png";
-
-        if(chip.drawflag){
-            ctx.clearRect(0, 0, screenWidth * pixelSize + 64,screenHeight * pixelSize + 32 );
-            drawScreen(chip.gfx);
-            chip.drawflag = false;
-        }
-    }
 
     basebutton.onchange = selectBase;
 
@@ -97,25 +98,7 @@
     //     67 : 15, 
     //     86 : 16
     // };
-        var keycodes = {
-        49 : 0, 
-        50 : 1,
-        51 : 2, 
-        52 : 3, 
-        81 : 4, 
-        87 : 5, 
-        69 : 6, 
-        82 : 7, 
-        65 : 8, 
-        83 : 9, 
-        68 : 10, 
-        70 : 11, 
-        90 : 12, 
-        88 : 13, 
-        67 : 14, 
-        86 : 15
-    };
-    
+
 
 
     // Screen Values
@@ -145,14 +128,22 @@
             var newy = (i / screenWidth) | 0; // round to int
             var newx  =  i % screenWidth;
             if(array[i]==1){
-                // console.log(i);
-                // ctx.fillRect(newx + (pixelSize * newx)-1, newy + (pixelSize * newy)-1, pixelSize ,pixelSize  );
-               ctx.fillRect((pixelSize * newx),  (pixelSize * newy), pixelSize ,pixelSize  );
+                ctx.fillRect((pixelSize * newx),  (pixelSize * newy), pixelSize ,pixelSize  );
             }
     	}
     }
 
+    function mainLoop(){
+        chip.cycle();
 
+        // updateHTML();
+
+        if(chip.drawflag){
+            ctx.clearRect(0, 0, screenWidth * pixelSize + 64,screenHeight * pixelSize + 32 );
+            drawScreen(chip.gfx);
+            chip.drawflag = false;
+        }
+    }
 
     function showregisterValues(){
         var regDiv = document.getElementById('registers');
@@ -246,9 +237,9 @@
 
     function xhrProgram(){
         var xhr = new XMLHttpRequest();
-        // xhr.open('GET', '/invaders.c8', true);
+        xhr.open('GET', '/invaders.c8', true);
         // xhr.open('GET', '/pong2.c8', true);
-        xhr.open('GET', '/tetris.c8', true);
+        // xhr.open('GET', '/tetris.c8', true);
         xhr.responseType = 'arraybuffer';
 
         xhr.onload = function(oEvent){
@@ -313,19 +304,8 @@
     }
 
     function turnProgramIntoGiantString(){
-        // var byteArray = new Uint8Array(chip.memory.length);
-        // var ar = chip.memory.slice(0x200, chip.memory.length);
-        console.log(chip.memory);
-        // var byteArray = new Uint8Array( chip.memory.slice(512, 4096 )  );
-        var gg = chip.memory;
 
         var byteArray = new Uint8Array(4096);
-        // for(var ii = 0; ii < 4096 - 0x200; ii++ ){
-        //     var mem = chip.memory[ii+512];
-        //     // console.log(mem);
-        //     byteArray[i] = mem;
-
-        // }
 
         var j = 0x200, i = 0, len = chip.memory.length-0x200;
         var str = "";
@@ -376,14 +356,11 @@
         if(chip.pc>5){
             var stopAt = chip.pc+20;
             var i = chip.pc-4;
-            // str += "> " + i + ": " + chip.memory[i].toString(16) + chip.memory[i+1].toString(16) +  "<br>";
-            
-            // i+=2;
+
             while(i < stopAt){
                 if(i==chip.pc){
                      str += "> " + i + ": " + getOpcodeHex(i) +  "<br>";
                 }else{
-                // str += i + ": " + chip.memory[i].toString(16) + chip.memory[i+1].toString(16) +  "<br>";
                     str += i + ": " + getOpcodeHex(i) +  "<br>";
                 }
                 i +=2;
@@ -401,7 +378,7 @@
         if(lowbyte=='0'){
             lowbyte='00';
         }
-        return lowbyte+hibyte;
+        return hibyte+lowbyte;
     }
 
     function printCodes(){

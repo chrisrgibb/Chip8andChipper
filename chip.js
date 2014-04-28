@@ -61,41 +61,9 @@ Chip.prototype.reset = function(){
 }
 
 
+
+
 Chip.prototype.cycle = function(){
-         // Fetch Opcode
-        var fetchedOp = this.fetch(this.opcode);
-        if(fetchedOp){
-      	   fetchedOp(); //execute op;
-     	}
-        if(delay_timer > 0){
-         	delay_timer--;
-        }
-        if(sound_timer > 0){
-         	if(sound_timer==1){
-         		console.log(" BEEEP");
-         	}
-         	sound_timer--;
-        }
-
-          // Decode Opcode
-          // Execute Opcode
-         
-          // Update timers
-}
-
-
-/*
- * 	Load program into memory
- */
-Chip.prototype.loadProgram = function(programArray){
-
-
-
-
-}
-
-
-Chip.prototype.otherCycle = function(){
 
 	 var opcode =  this.memory[this.pc] << 8 | this.memory[this.pc + 1]; 
 	 // var opcode = this.memory[this.pc] << 8;
@@ -119,26 +87,6 @@ Chip.prototype.otherCycle = function(){
     }
 	
 }
-
-/**
- *
- * a method that runs through a few test codes
- */
-Chip.prototype.myCycle = function(opcodearray){
-	if(checkbox.checked){
-		this.fetch(opcodearray[STEP_THROUGH_COUNT]);
-		STEP_THROUGH_COUNT++;
-	}else{
-		// console.log("play right through");
-		var len = opcodearray.length;
-		for(var i = 0; i< len; i++){
-			this.fetch(opcodearray[i]);
-		}
-		STEP_THROUGH_COUNT  = len;
-	}
-	displayProgram();
-}
-
 
 
 Chip.prototype.fetch = function(opcode){
@@ -170,16 +118,12 @@ Chip.prototype.fetch = function(opcode){
 					// return from sub routine	
 					// console.log(" its 000E");
 					break;
-
 				}
 		},
 		"1000" : function(opcode, chip){
 			// jump to address 1NNN
 			var jumpto = opcode & 0x0FFF;
-			// console.log(jumpto);
-			// console.log("before " + pc);
 			chip.pc = jumpto;
-			// console.log("after " + pc);
 		},
 		"2000" : function(opcode, chip){
 			chip.stack[chip.sp] = chip.pc;
@@ -215,7 +159,6 @@ Chip.prototype.fetch = function(opcode){
 			}else{
 				chip.pc+=2;
 			}
-
 		},
 		"6000" : function(opcode, chip){
 			// 6XKK
@@ -312,6 +255,14 @@ Chip.prototype.fetch = function(opcode){
 					chip.v[y] -=chip.v[x];
 					chip.pc+=2;
 				break;
+				case "800e":
+				console.log("800e");
+					var x = (opcode & 0x0F00) >> 8;
+					var b = (this.v[x] & 0x80) >> 7;
+					this.v[15] = b;
+					this.v[x] = this.v[x] << 1;
+					this.pc+=2;
+				break; 
 			}
 		},
 		"9000" : function(opcode, chip){
@@ -468,12 +419,11 @@ Chip.prototype.fetch = function(opcode){
 					var x = (opcode & 0x0F00) >> 8;
 					var i = 0;
 					for(var i = 0; i <= x; i++){
-					// for(var i = 0; i <= x; i++){
 						chip.v[i] = chip.memory[chip.I + i];
 					}
 					chip.pc+=2;
 					chip.I += x+1;
-					// for(i ; i < 10 )
+
 
 				break;
 			}	
@@ -486,20 +436,11 @@ Chip.prototype.fetch = function(opcode){
 		return opcodes[convertedOp](opcode, this);
 	}else{
 
-
-
-		// first do all the ones dependent on first hex number
-		// switch(convertedOp){
-		// 	case "0" :		
-		// 		this.compareOpcodeZero(opcode);
-		// 	break;
-
-		// 	default: 
-		// }
-
 		convertedOp = (opcode & 0x00F0).toString(16);
 		switch(convertedOp){
+
 			case "00E0":
+				console.log("clear screen");
 				// clear the screen
 				var len = this.gfx.length;
 				for( var i =0 ; i< len; i++ ){
@@ -514,82 +455,7 @@ Chip.prototype.fetch = function(opcode){
 			return opcodes[convertedOp](opcode, this);
 		}
 
-		switch(convertedOp){
-
-			case "800e":
-				// 8X0E
-				//Shifts VX left by one. VF is set to the value of the most significant bit of VX before the shift.[
-				// assuming it is the 8th bit???
-				var x = (opcode & 0x0F00) >> 8;
-				var b = (this.v[x] & 0x80) >> 7;
-				this.v[15] = b;
-				this.v[x] = this.v[x] << 1;
-				this.pc+=2; 
-			break;
-			// case ""
-		}
 	}
 }
 
-Chip.prototype.drawScreen = function(opcode){
-		// console.log("draw screen" + this.I);
-		var x = this.v[((opcode & 0x0F00) >>	 8 )];
-		var y = this.v[(opcode & 0x00F0) >> 4 ];
-		var height = (opcode & 0x000F)  ;
-		var pixel; 
-		// console.log(" x : " + x + " y : " + y + " height : " + height);
-		for( var yline = 0; yline < height; yline++){
-			pixel = this.memory[this.I + yline];
-			for( var xline = 0; xline < 8; xline++){
-				if((pixel & (0x80 >> xline)) != 0){
-					if(this.gfx[ x + xline +((y + yline) * 64 )] ==1  ){
-						this.v[0xF] =1;
-					}
-					this.gfx[x + xline + ((y + yline) * 64)] ^= 1;
-				}
-			}
-		}
-		this.drawflag = true;
-		this.pc +=2;
-}
 
-
-Chip.prototype.compareOpcodeZero = function(opcode){
-	// console.log(" opcodeZero " + opcode);
-	var convertedOp = ( opcode & 0x000F).toString(16);
-	// console.log("convertedOp = " + convertedOp + ", op = " + opcode);
-	switch(convertedOp){
-		case "0":
-			// clear the screen
-			var len = this.gfx.length;
-			for(var i = 0; i< len; i++){
-				this.gfx[i] = 0;
-			}
-			this.drawflag = true;
-			this.pc+=2;
-			// console.log(" its 0000");
-			break;
-		case "e":
-			// return from sub routine	
-			// console.log(" its 000E");
-			break;
-
-	}
-}
-
-Chip.prototype.testDraw = function(){
-	this.memory[I]     = 0x3C;
-	this.memory[I + 1] = 0xC3;
-	this.memory[I + 2] = 0xFF;
-	
-}
-
-// Chip.prototype.testF = function(){
-// 	var gf = 0x68;
-// 	var b1 =  gf  /100;
-// 	var a1 = ( ( gf / 10) % 10 ) | 0;
-// 	var a2 = ( gf % 100) % 10;
-// 	console.log( b1 + " " + a1 + " "  + a2);
-
-
-// }
