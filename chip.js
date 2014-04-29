@@ -1,8 +1,4 @@
 
-
-
-
-
 function Chip(){
 	this.reset();
 
